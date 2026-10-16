@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from tools.sitecheck import check_page, parse_page
+from tools.sitecheck import check_page, check_site, parse_page
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -204,6 +204,11 @@ class Privacy(unittest.TestCase):
 
     def test_publisher(self):
         self.assertIn("Kiki Gadgets Ltd", self.p.text)
+
+
+class WholeSite(unittest.TestCase):
+    def test_check_site_clean(self):
+        self.assertEqual(check_site(ROOT), [])
 
 
 if __name__ == "__main__":

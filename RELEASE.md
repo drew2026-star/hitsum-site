@@ -1,0 +1,30 @@
+# Release day (Nov 7, 2026)
+
+Do these in order once HitSum is live on the App Store.
+
+1. **Swap the call to action.** `index.html` has two `<!-- CTA:BEGIN -->` … `<!-- CTA:END -->`
+   regions. Replace the "Coming to the App Store · Nov 7" pill in each with Apple's badge:
+   - Download the official "Download on the App Store" badge (black, US English) from Apple's
+     Marketing Resources site and save it as `assets/badges/app-store-badge.svg`.
+   - Markup:
+     ```html
+     <!-- CTA:BEGIN -->
+     <a href="APP_STORE_URL"><img src="/assets/badges/app-store-badge.svg" alt="Download on the App Store" width="120" height="40"></a>
+     <!-- CTA:END -->
+     ```
+   - Change the "Free to download" note under the hero if you want different wording.
+2. **Smart App Banner.** Add `<meta name="apple-itunes-app" content="app-id=APP_ID">` to the
+   `<head>` of all five pages (`index.html`, `setup/`, `support/`, `privacy/`, `404.html`).
+3. **JSON-LD.** In `index.html`'s `SoftwareApplication` block, add
+   `"downloadUrl":"APP_STORE_URL","installUrl":"APP_STORE_URL"`.
+4. **Test.** Run `python3 -m unittest discover -s tests` and `python3 tools/sitecheck.py`.
+   `Home.test_two_cta_regions_with_prelaunch_text` fails by design after step 1: change it to
+   assert the badge link (`APP_STORE_URL` in `links`, two CTA regions). Everything else must pass.
+5. **Publish.** Commit and push to `main`; GitHub Pages deploys in a minute or two.
+6. **App Store Connect.** Set the Support URL to `https://hitsum.app/support/` and the Privacy
+   Policy URL to `https://hitsum.app/privacy/` (with the next version, or as a metadata edit
+   where Apple allows it).
+7. **Privacy copies.** `kikigadgetsltd.com/privacy-hitsum.html` still holds the same policy.
+   Keep both in sync when the policy changes, or replace that page with a link to
+   `https://hitsum.app/privacy/`.
+8. **App links.** Set `AppLink.url` in the golftrace app repo (tracked there, not here).
