@@ -75,11 +75,11 @@ The sections, in order:
    - *Shot tracer*: film a swing, tap the ball, share a clip with the flight line and carry.
    - *See it land and know your bag*: 3D range with greens from 50 to 350 yd, plus per-club carry analysis.
    - On desktop, rows alternate image left/right. On phones they stack.
-3. **Honest numbers.** A short strip: lime values are measured from high-speed video and grey "EST" values are estimated (for example, total and apex assume typical spin). It contains no percentages.
+3. **Honest numbers.** A short strip: ball speed, launch and direction are measured from the arc the camera saw (lime); carry and apex assume a typical spin for the club, so they carry a grey "EST" tag. It contains no percentages.
 4. **Set up in 30 seconds.** Three numbered steps that mirror the in-app tutorial cards:
-   1. Secure the phone 6–10 ft from the ball, side-on to the target line, upright, with the ball near the bottom of the frame.
-   2. Tap the ball on screen and wait for "Ready".
-   3. Hit, and hear your numbers.
+   1. Set up directly behind the ball, 7.5 ft (2.3 m) away: two driver lengths. Shade the phone.
+   2. Tap the ball you'll hit, tap Start, and hit when it says "Ready".
+   3. Hear your numbers. Lime is measured, grey is estimated.
 
    Followed by a link to `/setup/`.
 5. **Free vs Premium.** Two columns:
@@ -100,12 +100,12 @@ The sections, in order:
 
 Sections with in-page anchors so Support and the FAQ can deep-link:
 
-- `#launch-monitor`: placement (distance, side-on, upright, ball low in frame), 240 fps slow motion, light (bright and even; shade hurts detection), indoors (8–10 ft), tapping the ball, and lime vs grey.
+- `#launch-monitor`: placement (directly behind the ball, 7.5 ft / 2.3 m = two driver lengths, measured not guessed: a foot off at 7.5 ft puts every number off by 13%), shade the phone, bright light (too dark means missed shots), indoors (8–10 ft from a net or screen), tapping the ball and the tracking circle, and lime vs grey.
 - `#shot-tracer`: hold still and don't follow the ball; record, then mark the ball under the crosshair; check, then trace; sharing.
 - `#join`: hosting (Premium) vs watching (free; iPad and older iPhones on 17.2+).
 - `#troubleshooting`: "Missed" shots, ball not found, numbers look off. Each item gets a one-line cause and fix.
 
-Illustrations use existing screenshots for now. The page reserves a slot for each of the six planned tutorial photos (`securedPhone`, `tapTheBall`, `measuredAndEstimated`, `holdStill`, `recordThenMark`, `checkThenTrace`) so they can drop in later. The copy must match the in-app tutorial cards. Where they disagree, the app is the source of truth.
+Illustrations use existing screenshots for now. The page reserves a slot for each of the three in-app tutorial photos (`securedPhone`, `tapTheBall`, `measuredAndEstimated`) so they can drop in later. The copy must match the in-app tutorial cards (`golftrace/ios/Sources/GolfTraceAppCore/Tutorial.swift`) and setup copy (`GolferCopy.swift`). Where they disagree with any other source, including the App Store description, the app is the source of truth.
 
 ### 5.3 Support (`/support/`)
 
@@ -128,7 +128,7 @@ The brand header, a single line, and links to Home and Setup.
 - **Colors** (sampled from the App Store screenshots) as CSS custom properties:
   - `--bg: #121315`
   - `--surface: #1b1d1f`, for cards and FAQ items
-  - `--text: #ffffff`
+  - `--text: #ecedee` (the wordmark white)
   - `--text-muted: #9aa0a6`, for grey "estimated"-style text. Must meet 4.5:1 contrast on `--bg`.
   - `--lime: #c8f542`, for accents, headings' emphasis and the CTA pill. Never used for body text on white.
 - **Type:**
