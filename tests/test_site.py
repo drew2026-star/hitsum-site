@@ -69,5 +69,58 @@ class SiteFiles(unittest.TestCase):
         self.assertEqual(page_problems("404.html"), [])
 
 
+class Home(unittest.TestCase):
+    def setUp(self):
+        self.p = page("index.html")
+
+    def test_home_passes_page_check(self):
+        self.assertEqual(page_problems("index.html"), [])
+
+    def test_hero(self):
+        self.assertEqual(self.p.h1s, ["Your iPhone is the launch monitor."])
+        self.assertIn("Nothing to buy, pair or charge.", self.p.text)
+
+    def test_two_cta_regions_with_prelaunch_text(self):
+        self.assertEqual((self.p.cta_begin, self.p.cta_end), (2, 2))
+        self.assertEqual(self.p.text.count("Coming to the App Store · Nov 7"), 2)
+
+    def test_sections_present(self):
+        self.assertLessEqual({"features", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)
+
+    def test_faq_items(self):
+        self.assertEqual(self.p.details_count, 8)
+        for i in ["iphones", "slowmo", "indoors", "accuracy", "spin", "altitude", "android", "free"]:
+            self.assertIn(f"faq-{i}", self.p.ids)
+
+    def test_setup_steps_match_app(self):
+        for s in ["directly behind the ball", "7.5 ft (2.3 m)", "two driver lengths"]:
+            self.assertIn(s, self.p.text)
+
+    def test_estimated_values_named(self):
+        self.assertIn("Carry and apex", self.p.text)
+
+    def test_free_tier(self):
+        self.assertIn("15 measured shots a day", self.p.text)
+        self.assertIn("7-day free trial", self.p.text)
+
+    def test_jsonld_software_application(self):
+        apps = [j for j in self.p.jsonld if j.get("@type") == "SoftwareApplication"]
+        self.assertEqual(len(apps), 1)
+        app = apps[0]
+        self.assertEqual(app["operatingSystem"], "iOS")
+        self.assertEqual(app["applicationCategory"], "SportsApplication")
+        self.assertEqual(app["offers"]["price"], "0")
+        self.assertNotIn("aggregateRating", app)
+
+    def test_links_to_setup(self):
+        self.assertIn("/setup/", self.p.links)
+
+    def test_hero_image_eager_rest_lazy(self):
+        imgs = [i for i in self.p.images if i["tag"] == "img" and "wordmark" not in i.get("src", "")]
+        self.assertNotEqual(imgs[0].get("loading"), "lazy")
+        for img in imgs[1:]:
+            self.assertEqual(img.get("loading"), "lazy", img.get("src"))
+
+
 if __name__ == "__main__":
     unittest.main()
