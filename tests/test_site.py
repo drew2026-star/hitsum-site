@@ -153,5 +153,33 @@ class Setup(unittest.TestCase):
         self.assertEqual(self.p.h1s, ["Set up HitSum"])
 
 
+class Support(unittest.TestCase):
+    def setUp(self):
+        self.p = page("support/index.html")
+
+    def test_support_passes_page_check(self):
+        self.assertEqual(page_problems("support/index.html"), [])
+
+    def test_contact_mailto(self):
+        self.assertIn("mailto:support@kikigadgetsltd.com", self.p.links)
+        self.assertIn("support@kikigadgetsltd.com", self.p.text)
+
+    def test_deep_links(self):
+        for href in ["/setup/#launch-monitor", "/setup/#troubleshooting", "/#free-premium"]:
+            self.assertIn(href, self.p.links)
+
+    def test_subscription_help(self):
+        # The app's label (SettingsView.swift) is "Restore purchases".
+        self.assertIn("Restore purchases", self.p.text)
+        self.assertIn("24 hours", self.p.text)
+        self.assertTrue(any(h.startswith("https://support.apple.com/") for h in self.p.links))
+
+    def test_account_deletion(self):
+        self.assertIn("Delete account", self.p.text)
+
+    def test_h1(self):
+        self.assertEqual(self.p.h1s, ["HitSum support"])
+
+
 if __name__ == "__main__":
     unittest.main()
