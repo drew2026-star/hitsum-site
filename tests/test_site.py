@@ -122,5 +122,36 @@ class Home(unittest.TestCase):
             self.assertEqual(img.get("loading"), "lazy", img.get("src"))
 
 
+class Setup(unittest.TestCase):
+    def setUp(self):
+        self.p = page("setup/index.html")
+
+    def test_setup_passes_page_check(self):
+        self.assertEqual(page_problems("setup/index.html"), [])
+
+    def test_setup_anchors(self):
+        want = {"launch-monitor", "shot-tracer", "join", "troubleshooting",
+                "photo-securedPhone", "photo-tapTheBall", "photo-measuredAndEstimated"}
+        self.assertLessEqual(want, self.p.ids)
+
+    def test_tutorial_titles_verbatim(self):
+        for title in ["Set up directly behind the ball", "Select your hitting area",
+                      "Lime is measured. Grey is estimated."]:
+            self.assertIn(title, self.p.text)
+
+    def test_distance_copy(self):
+        self.assertIn("7.5 ft (2.3 m)", self.p.text)
+        self.assertIn("two driver lengths", self.p.text)
+        self.assertIn("A foot off at 7.5 ft puts every number off by", self.p.text)
+        self.assertIn("eighth", self.p.text)
+
+    def test_troubleshooting_items(self):
+        for s in ["Too dark", "Not the ball", "sideways", "Missed"]:
+            self.assertIn(s, self.p.text)
+
+    def test_title_and_h1(self):
+        self.assertEqual(self.p.h1s, ["Set up HitSum"])
+
+
 if __name__ == "__main__":
     unittest.main()
