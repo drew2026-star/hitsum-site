@@ -181,5 +181,30 @@ class Support(unittest.TestCase):
         self.assertEqual(self.p.h1s, ["HitSum support"])
 
 
+SRC_MD = Path.home() / "AndroidStudioProjects/golftrace/docs/legal/privacy.md"
+
+
+class Privacy(unittest.TestCase):
+    def setUp(self):
+        self.p = page("privacy/index.html")
+
+    def test_privacy_passes_page_check(self):
+        self.assertEqual(page_problems("privacy/index.html"), [])
+
+    @unittest.skipUnless(SRC_MD.exists(), "golftrace repo not on this machine")
+    def test_headings_match_source(self):
+        want = [line[3:].strip() for line in SRC_MD.read_text().splitlines() if line.startswith("## ")]
+        self.assertEqual(self.p.h2s, want)
+
+    def test_effective_date(self):
+        self.assertIn("September 25, 2026", self.p.text)
+
+    def test_h1(self):
+        self.assertEqual(self.p.h1s, ["HitSum Privacy Policy"])
+
+    def test_publisher(self):
+        self.assertIn("Kiki Gadgets Ltd", self.p.text)
+
+
 if __name__ == "__main__":
     unittest.main()

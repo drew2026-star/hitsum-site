@@ -39,6 +39,10 @@ class ParsePage(unittest.TestCase):
         self.assertEqual(page.lang, "en")
         self.assertEqual(page.meta["og:title"], "t")
 
+    def test_parse_page_collects_h2s(self):
+        page = parse_page(with_body("<h2>One</h2><section><h2>Two <em>x</em></h2></section>"))
+        self.assertEqual(page.h2s, ["One", "Two x"])
+
 
 class CheckPage(unittest.TestCase):
     def test_good_page_has_no_problems(self):

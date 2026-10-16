@@ -165,3 +165,8 @@ p { margin: 0 0 1em; }
   padding: 32px 20px; text-align: center; color: var(--text-muted);
 }
 .nowrap { white-space: nowrap; }
+
+/* Tables (privacy policy) */
+.prose table { width: 100%; border-collapse: collapse; margin: 1em 0 1.5em; font-size: 0.95rem; display: block; overflow-x: auto; }
+.prose th, .prose td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.prose th { color: var(--text-muted); font-weight: 600; }
