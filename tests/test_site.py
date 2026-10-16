@@ -65,6 +65,11 @@ class SiteFiles(unittest.TestCase):
         self.assertGreaterEqual(contrast(t["--text-muted"], t["--bg"]), 4.5)
         self.assertGreaterEqual(contrast(t["--text"], t["--bg"]), 7)
 
+    def test_anchor_jumps_are_instant(self):
+        # Smooth scrolling stalled /setup/#troubleshooting deep links in an unfocused
+        # Chromium pane (scrollY stayed 0); instant jumps always land.
+        self.assertNotIn("scroll-behavior: smooth", (ROOT / "style.css").read_text())
+
     def test_404_page_passes(self):
         self.assertEqual(page_problems("404.html"), [])
 
