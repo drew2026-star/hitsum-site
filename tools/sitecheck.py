@@ -22,6 +22,9 @@ PAGES: dict[str, str | None] = {
     "404.html": None,
 }
 
+# Other launch monitors: the site never compares itself to them.
+MONITORS = r"garmin|rapsodo|track\s?man|true\s?carry|foresight|sky\s?trak|mevo"
+
 SOCIAL_TAGS = ["og:title", "og:description", "og:image", "og:url", "twitter:card"]
 
 
@@ -44,6 +47,8 @@ class Page:
     stylesheets: list[str] = field(default_factory=list)
     scripts: list[str] = field(default_factory=list)
     details_count: int = 0
+    alts: list[str] = field(default_factory=list)
+    placeholders: list[str] = field(default_factory=list)
 
 
 class _Parser(HTMLParser):
@@ -76,6 +81,12 @@ class _Parser(HTMLParser):
             p.links.append(a["href"])
         elif tag == "img" or (tag == "source" and "srcset" in a):
             p.images.append({"tag": tag, **a})
+            if a.get("alt"):
+                p.alts.append(a["alt"])
+        elif tag == "body":
+            # </head> is optional: leaving the head open would hide all body text.
+            while "head" in self.stack:
+                self.stack.pop()
         elif tag == "script":
             if "src" in a:
                 p.scripts.append(a["src"])
@@ -126,18 +137,19 @@ def parse_page(html: str, path: str = "") -> Page:
     parser.feed(html)
     parser.close()
     page.text = " ".join(" ".join(parser.text).split())
+    page.placeholders = sorted(set(re.findall(r"APP_STORE_URL|APP_ID", html)))
     return page
 
 
 def check_copy(text: str) -> list[str]:
     problems = []
-    if re.search(r"\d\s?%", text):
+    if re.search(r"\d\s?(%|per\s?cent)", text, re.I):
         problems.append("percentage")
-    if re.search(r"\bR10\b", text) or re.search(r"garmin", text, re.I):
+    if re.search(r"\bR10\b", text) or re.search(MONITORS, text, re.I):
         problems.append("monitor comparison")
-    if re.search(r"\$\s?\d", text):
+    if re.search(r"[$£€]\s?\d|\d\.\d{2}\s*/\s*(mo|month|yr|year)\b", text, re.I):
         problems.append("price")
-    if re.search(r"side-on", text, re.I):
+    if re.search(r"\bside[\s\-\u2010\u2011]?on\b", text, re.I):
         problems.append("superseded placement wording")
     for m in re.finditer(r"android", text, re.I):
         if "not yet" not in text[m.end():m.end() + 80].lower():
@@ -200,8 +212,16 @@ def check_page(page: Page, root: Path) -> list[str]:
             if url.startswith("/") and not (root / url[1:]).is_file():
                 problems.append(f"image missing: {url}")
 
+    for name in page.placeholders:
+        problems.append(f"release placeholder {name} left in the page")
+
     own_ids = page.ids
     for href in page.links:
+        if href.startswith(ORIGIN + "/"):
+            href = href[len(ORIGIN):]
+        elif not href.startswith(("/", "#", "http:", "https:", "mailto:", "tel:")):
+            problems.append(f"use a root-relative link: {href}")
+            continue
         if href.startswith("#"):
             if href[1:] not in own_ids:
                 problems.append(f"missing anchor {href} on this page")
@@ -223,7 +243,11 @@ def check_page(page: Page, root: Path) -> list[str]:
                 if frag not in ids:
                     problems.append(f"missing anchor #{frag} in {href}")
 
-    problems += check_copy(page.text)
+    seen = " ".join([page.text, page.title, *page.meta.values(), *page.alts,
+                     *(json.dumps(j, ensure_ascii=False) for j in page.jsonld)])
+    for problem in check_copy(seen):
+        if problem not in problems:
+            problems.append(problem)
     return problems
 
 

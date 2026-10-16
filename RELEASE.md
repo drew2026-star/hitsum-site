@@ -2,8 +2,9 @@
 
 Do these in order once HitSum is live on the App Store.
 
-1. **Swap the call to action.** `index.html` has two `<!-- CTA:BEGIN -->` … `<!-- CTA:END -->`
-   regions. Replace the "Coming to the App Store · Nov 7" pill in each with Apple's badge:
+1. **Swap the call to action.** There are six `<!-- CTA:BEGIN -->` … `<!-- CTA:END -->` regions:
+   two in `index.html` (hero and closing) and one in the install band of `setup/`, `support/`,
+   `privacy/` and `404.html`. Replace the "Coming to the App Store · Nov 7" pill in each with Apple's badge:
    - Download the official "Download on the App Store" badge (black, US English) from Apple's
      Marketing Resources site and save it as `assets/badges/app-store-badge.svg`.
    - Markup:
@@ -18,8 +19,11 @@ Do these in order once HitSum is live on the App Store.
 3. **JSON-LD.** In `index.html`'s `SoftwareApplication` block, add
    `"downloadUrl":"APP_STORE_URL","installUrl":"APP_STORE_URL"`.
 4. **Test.** Run `python3 -m unittest discover -s tests` and `python3 tools/sitecheck.py`.
-   `Home.test_two_cta_regions_with_prelaunch_text` fails by design after step 1: change it to
-   assert the badge link (`APP_STORE_URL` in `links`, two CTA regions). Everything else must pass.
+   `sitecheck` reports any `APP_STORE_URL` or `APP_ID` left unreplaced, so a forgotten placeholder
+   can't ship. `Home.test_two_cta_regions_with_prelaunch_text` fails by design after step 1: change
+   it to assert the real App Store link is in `links` and there are still two CTA regions.
+   Everything else must pass.
+   **If App Review slips past Nov 7,** change the date in all six pills (`grep -rn "Nov 7" --include=*.html .`).
 5. **Publish.** Commit and push to `main`; GitHub Pages deploys in a minute or two.
 6. **App Store Connect.** Set the Support URL to `https://hitsum.app/support/` and the Privacy
    Policy URL to `https://hitsum.app/privacy/` (with the next version, or as a metadata edit

@@ -27,6 +27,12 @@ def page_problems(rel):
     return [p for p in check_page(page(rel), ROOT) if not p.startswith("link target missing")]
 
 
+def content_images(p):
+    """<img>s other than the header wordmark and the App Store badge."""
+    return [i for i in p.images if i["tag"] == "img"
+            and "wordmark" not in i.get("src", "") and "/assets/badges/" not in i.get("src", "")]
+
+
 def contrast(a, b):
     def lum(hex_):
         rgb = [int(hex_[i:i + 2], 16) / 255 for i in (1, 3, 5)]
@@ -69,6 +75,18 @@ class SiteFiles(unittest.TestCase):
         # Smooth scrolling stalled /setup/#troubleshooting deep links in an unfocused
         # Chromium pane (scrollY stayed 0); instant jumps always land.
         self.assertNotIn("scroll-behavior: smooth", (ROOT / "style.css").read_text())
+
+    def test_every_page_has_an_install_cta(self):
+        # Spec §7: each page carries the CTA block, so visitors landing anywhere can install.
+        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+            self.assertGreaterEqual(page(rel).cta_begin, 1, rel)
+
+    def test_cta_pill_wraps_on_narrow_screens(self):
+        # At 320px the nowrap pill (302px) was wider than the 288px column and ate the right gutter.
+        css = (ROOT / "style.css").read_text()
+        narrow = re.search(r"@media \(max-width: 359px\) \{(.*?)\n\}", css, re.DOTALL)
+        self.assertIsNotNone(narrow)
+        self.assertRegex(narrow.group(1), r"\.cta-pill \{[^}]*white-space: normal")
 
     def test_404_page_passes(self):
         self.assertEqual(page_problems("404.html"), [])
@@ -121,10 +139,18 @@ class Home(unittest.TestCase):
         self.assertIn("/setup/", self.p.links)
 
     def test_hero_image_eager_rest_lazy(self):
-        imgs = [i for i in self.p.images if i["tag"] == "img" and "wordmark" not in i.get("src", "")]
+        imgs = content_images(self.p)
         self.assertNotEqual(imgs[0].get("loading"), "lazy")
         for img in imgs[1:]:
             self.assertEqual(img.get("loading"), "lazy", img.get("src"))
+
+    def test_release_badge_does_not_change_which_image_is_the_hero(self):
+        badge = ('<a href="https://apps.apple.com/app/id1"><img src="/assets/badges/app-store-badge.svg" '
+                 'alt="Download on the App Store" width="120" height="40"></a>')
+        html = re.sub(r"<!-- CTA:BEGIN -->.*?<!-- CTA:END -->", f"<!-- CTA:BEGIN -->{badge}<!-- CTA:END -->",
+                      (ROOT / "index.html").read_text(), flags=re.DOTALL)
+        imgs = content_images(parse_page(html, "index.html"))
+        self.assertIn("shot-run", imgs[0]["src"])
 
 
 class Setup(unittest.TestCase):

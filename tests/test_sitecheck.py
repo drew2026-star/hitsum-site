@@ -99,6 +99,45 @@ class CheckCopy(unittest.TestCase):
         self.assertEqual(check_copy("Coming to Android soon."), ["android claim"])
 
 
+class FinalReviewFixes(unittest.TestCase):
+    def test_copy_checked_in_title_meta_alt_and_jsonld(self):
+        title = GOOD.replace("<title>T</title>", "<title>99% accurate</title>")
+        meta = GOOD.replace('content="d">', 'content="Only £4.99">')
+        alt = with_body('<img src="/style.css" alt="Beats Garmin" width="1" height="1">')
+        jsonld = with_body('<script type="application/ld+json">{"description": "side-on setup"}</script>')
+        for html, want in [(title, "percentage"), (meta, "price"), (alt, "monitor comparison"),
+                           (jsonld, "superseded placement wording")]:
+            self.assertIn(want, problems_for(html), want)
+
+    def test_copy_flags_variants(self):
+        self.assertEqual(check_copy("only £4.99"), ["price"])
+        self.assertEqual(check_copy("only €5"), ["price"])
+        self.assertEqual(check_copy("29.99/yr"), ["price"])
+        self.assertEqual(check_copy("off by 2 percent"), ["percentage"])
+        self.assertEqual(check_copy("stand side on"), ["superseded placement wording"])
+        self.assertEqual(check_copy("stand side\u2011on"), ["superseded placement wording"])
+        for name in ["Rapsodo", "Trackman", "TrackMan", "True Carry", "Foresight", "SkyTrak", "Mevo"]:
+            self.assertEqual(check_copy(f"better than {name}"), ["monitor comparison"], name)
+
+    def test_text_seen_when_head_is_not_closed(self):
+        page = parse_page("<html lang=en><head><title>t</title><body><p>99% accurate</p></body></html>")
+        self.assertIn("99% accurate", page.text)
+
+    def test_release_placeholder_is_reported(self):
+        found = problems_for(with_body('<a href="APP_STORE_URL">Get it</a>'))
+        self.assertTrue(any("placeholder" in p for p in found), found)
+        found = problems_for(GOOD.replace("</head>", '<meta name="apple-itunes-app" content="app-id=APP_ID"></head>'))
+        self.assertTrue(any("placeholder" in p for p in found), found)
+
+    def test_relative_link_is_reported(self):
+        found = problems_for(with_body('<a href="setup/#nope">x</a>'))
+        self.assertTrue(any("root-relative" in p for p in found), found)
+
+    def test_absolute_same_site_link_is_checked(self):
+        found = problems_for(with_body('<a href="https://hitsum.app/setupp/">x</a>'))
+        self.assertTrue(any(p.startswith("link target missing") for p in found), found)
+
+
 class CheckSite(unittest.TestCase):
     def test_check_site_requires_cname_sitemap_robots(self):
         with tempfile.TemporaryDirectory() as d:
