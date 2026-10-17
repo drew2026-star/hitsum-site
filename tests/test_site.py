@@ -287,6 +287,8 @@ class Setup(unittest.TestCase):
         self.assertIn("7.5 ft (2.3 m)", self.p.text)
         self.assertIn("two driver lengths", self.p.text)
         self.assertIn("A foot off at 7.5 ft puts every number off by 13%.", self.p.text)
+        # 13% of 250 yd = 32.5 yd
+        self.assertIn("On a 250-yard drive, that's more than 30 yards.", self.p.text)
         self.assertNotIn("eighth", self.p.text)
 
     def test_troubleshooting_items(self):
