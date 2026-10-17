@@ -302,6 +302,14 @@ class Setup(unittest.TestCase):
         amazon = [h for h in self.p.links if h.startswith("https://www.amazon.com/s?k=")]
         self.assertEqual(len(amazon), 2)
 
+    def test_amazon_links_open_in_a_new_tab(self):
+        html = (ROOT / "setup/index.html").read_text()
+        tags = re.findall(r'<a [^>]*href="https://www\.amazon\.com/s\?k=[^"]*"[^>]*>', html)
+        self.assertEqual(len(tags), 2)
+        for tag in tags:
+            self.assertIn('target="_blank"', tag)
+            self.assertIn('rel="noopener"', tag)
+
     def test_kit_photo_fills_the_secured_phone_slot(self):
         html = (ROOT / "setup/index.html").read_text()
         slot = html[html.index('id="photo-securedPhone"'):]
