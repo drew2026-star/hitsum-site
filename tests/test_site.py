@@ -92,6 +92,13 @@ class SiteFiles(unittest.TestCase):
         self.assertEqual(page_problems("404.html"), [])
 
 
+SETUP_VIDEO = "https://www.youtube-nocookie.com/embed/DiPGG06o8gQ"
+
+
+def setup_videos(p):
+    return [f for f in p.iframes if f.get("src", "").startswith(SETUP_VIDEO)]
+
+
 class Home(unittest.TestCase):
     def setUp(self):
         self.p = page("index.html")
@@ -134,6 +141,12 @@ class Home(unittest.TestCase):
         self.assertEqual(app["applicationCategory"], "SportsApplication")
         self.assertEqual(app["offers"]["price"], "0")
         self.assertNotIn("aggregateRating", app)
+
+    def test_setup_video_in_setup_steps(self):
+        videos = setup_videos(self.p)
+        self.assertEqual(len(videos), 1)
+        self.assertEqual(videos[0].get("title"), "HitSum launch monitor setup")
+        self.assertEqual(videos[0].get("_section"), "setup-steps")
 
     def test_links_to_setup(self):
         self.assertIn("/setup/", self.p.links)
@@ -182,6 +195,11 @@ class Setup(unittest.TestCase):
 
     def test_title_and_h1(self):
         self.assertEqual(self.p.h1s, ["Set up HitSum"])
+
+    def test_setup_video_in_launch_monitor_section(self):
+        videos = setup_videos(self.p)
+        self.assertEqual(len(videos), 1)
+        self.assertEqual(videos[0].get("_section"), "launch-monitor")
 
 
 class Support(unittest.TestCase):

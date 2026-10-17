@@ -25,6 +25,10 @@ PAGES: dict[str, str | None] = {
 # Other launch monitors: the site never compares itself to them.
 MONITORS = r"garmin|rapsodo|track\s?man|true\s?carry|foresight|sky\s?trak|mevo"
 
+# The only third-party content allowed: YouTube's privacy-enhanced player,
+# which sets no cookies until a visitor presses play.
+EMBED_ORIGIN = "https://www.youtube-nocookie.com"
+
 SOCIAL_TAGS = ["og:title", "og:description", "og:image", "og:url", "twitter:card"]
 
 
@@ -48,6 +52,7 @@ class Page:
     scripts: list[str] = field(default_factory=list)
     details_count: int = 0
     alts: list[str] = field(default_factory=list)
+    iframes: list[dict[str, str]] = field(default_factory=list)  # attrs + "_section": enclosing section id
     placeholders: list[str] = field(default_factory=list)
 
 
@@ -56,6 +61,7 @@ class _Parser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.page = page
         self.stack: list[str] = []
+        self.sections: list[str] = []  # ids of open <section>s, "" for unnamed
         self.capture: str | None = None  # "title" | "h1" | "h2" | "jsonld"
         self.buf: list[str] = []
         self.text: list[str] = []
@@ -83,6 +89,11 @@ class _Parser(HTMLParser):
             p.images.append({"tag": tag, **a})
             if a.get("alt"):
                 p.alts.append(a["alt"])
+        elif tag == "section":
+            self.sections.append(a.get("id", ""))
+        elif tag == "iframe":
+            named = [s for s in self.sections if s]
+            p.iframes.append({**a, "_section": named[-1] if named else ""})
         elif tag == "body":
             # </head> is optional: leaving the head open would hide all body text.
             while "head" in self.stack:
@@ -100,6 +111,8 @@ class _Parser(HTMLParser):
             self.stack.append(tag)
 
     def handle_endtag(self, tag):
+        if tag == "section" and self.sections:
+            self.sections.pop()
         if self.capture == tag or (self.capture == "jsonld" and tag == "script"):
             content = "".join(self.buf)
             if self.capture == "jsonld":
@@ -214,6 +227,15 @@ def check_page(page: Page, root: Path) -> list[str]:
 
     for name in page.placeholders:
         problems.append(f"release placeholder {name} left in the page")
+
+    for frame in page.iframes:
+        src = frame.get("src", "")
+        if not src.startswith(EMBED_ORIGIN + "/embed/"):
+            problems.append(f"iframe must use the privacy-enhanced {EMBED_ORIGIN}/embed/: {src}")
+        if not frame.get("title"):
+            problems.append(f"iframe {src} has no title")
+        if frame.get("loading") != "lazy":
+            problems.append(f'iframe {src} needs loading="lazy"')
 
     own_ids = page.ids
     for href in page.links:

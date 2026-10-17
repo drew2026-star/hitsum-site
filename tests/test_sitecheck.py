@@ -138,6 +138,30 @@ class FinalReviewFixes(unittest.TestCase):
         self.assertTrue(any(p.startswith("link target missing") for p in found), found)
 
 
+class Iframes(unittest.TestCase):
+    NOCOOKIE = ('<iframe src="https://www.youtube-nocookie.com/embed/abc" title="Setup video" '
+                'loading="lazy" allowfullscreen></iframe>')
+
+    def test_parse_page_collects_iframes(self):
+        page = parse_page(with_body(self.NOCOOKIE))
+        self.assertEqual(page.iframes[0]["src"], "https://www.youtube-nocookie.com/embed/abc")
+
+    def test_privacy_enhanced_lazy_titled_iframe_passes(self):
+        self.assertEqual(problems_for(with_body(self.NOCOOKIE)), [])
+
+    def test_iframe_from_youtube_com_is_reported(self):
+        html = with_body(self.NOCOOKIE.replace("www.youtube-nocookie.com", "www.youtube.com"))
+        self.assertTrue(any("youtube-nocookie" in p for p in problems_for(html)))
+
+    def test_iframe_without_title_is_reported(self):
+        html = with_body(self.NOCOOKIE.replace(' title="Setup video"', ""))
+        self.assertTrue(any("title" in p for p in problems_for(html)))
+
+    def test_iframe_not_lazy_is_reported(self):
+        html = with_body(self.NOCOOKIE.replace(' loading="lazy"', ""))
+        self.assertTrue(any("lazy" in p for p in problems_for(html)))
+
+
 class CheckSite(unittest.TestCase):
     def test_check_site_requires_cname_sitemap_robots(self):
         with tempfile.TemporaryDirectory() as d:

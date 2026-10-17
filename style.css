@@ -179,3 +179,16 @@ figure:has(> .photo-slot:only-child) { display: none; }
 @media (max-width: 359px) {
   .cta-pill { white-space: normal; text-align: center; padding: 12px 18px; }
 }
+
+/* Setup video (vertical YouTube Short) */
+.video-frame { margin: 0 auto; width: 100%; max-width: 320px; }
+.video {
+  display: block; width: 100%; height: auto; aspect-ratio: 9 / 16; border: 0;
+  border-radius: 24px; background: var(--surface);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px var(--line);
+}
+.setup-grid { display: grid; gap: 40px; align-items: center; }
+@media (min-width: 768px) {
+  .setup-grid { grid-template-columns: 320px 1fr; gap: 64px; }
+  .steps.steps--stacked { grid-template-columns: 1fr; }
+}

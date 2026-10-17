@@ -42,6 +42,7 @@ The site has four jobs:
 | Theme | Dark only | Matches the app; one theme to maintain |
 | Fonts | System stack + `ui-monospace` / SF Mono for numerals | No web font downloads |
 | Hero media | App Store screenshot #1 in a phone frame | Real footage doesn't exist yet; the layout accepts a looping video later without changes |
+| Setup video | YouTube Short `DiPGG06o8gQ` embedded on Home (`#setup-steps`) and Setup (`#launch-monitor`) via `https://www.youtube-nocookie.com/embed/`, `loading="lazy"`, titled | Added 2026-10-17 by owner decision: plays in page; privacy-enhanced player sets no cookies until play. The one allowed third-party request; `sitecheck` rejects any other iframe origin |
 | Analytics | None in the page; optional Cloudflare Web Analytics toggled in the dashboard | No cookies, no consent banner, consistent with the privacy policy |
 | Pricing | Describe Free vs Premium features; no prices | Owner decision |
 
