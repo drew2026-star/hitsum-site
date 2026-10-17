@@ -1,5 +1,12 @@
 # Release day (Nov 7, 2026)
 
+**App ID:** `6813047446`
+**App Store URL:** use `https://apps.apple.com/app/id6813047446`, which always redirects to the
+listing. The full listing URL is expected to be
+`https://apps.apple.com/us/app/hitsum-golf-launch-monitor/id6813047446`, but its name part
+follows the final App Store name, so prefer the short form. Check that both open once released.
+Wherever a step below says `APP_STORE_URL` or `APP_ID`, use these values.
+
 Do these in order once HitSum is live on the App Store.
 
 1. **Swap the call to action.** There are six `<!-- CTA:BEGIN -->` … `<!-- CTA:END -->` regions:
