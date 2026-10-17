@@ -1,4 +1,6 @@
+import json
 import re
+import subprocess
 import unittest
 from pathlib import Path
 
@@ -55,6 +57,23 @@ class SiteFiles(unittest.TestCase):
         self.assertEqual(Image.open(ROOT / "assets/img/og.png").size, (1200, 630))
         self.assertEqual(Image.open(ROOT / "assets/img/icon-180.png").size, (180, 180))
         self.assertEqual(Image.open(ROOT / "assets/img/favicon-32.png").size, (32, 32))
+
+    def test_preview_clips_are_small_silent_640_wide(self):
+        for stem in ["hole", "analysis"]:
+            clip = ROOT / f"assets/video/preview-{stem}.mp4"
+            self.assertLess(clip.stat().st_size, 2_000_000, clip.name)
+            probe = json.loads(subprocess.run(
+                ["ffprobe", "-v", "error", "-show_streams", "-of", "json", str(clip)],
+                capture_output=True, text=True, check=True).stdout)["streams"]
+            self.assertEqual([st["codec_type"] for st in probe], ["video"], clip.name)
+            self.assertEqual((probe[0]["codec_name"], probe[0]["width"]), ("h264", 640))
+            poster = Image.open(ROOT / f"assets/video/preview-{stem}.webp")
+            self.assertEqual(poster.width, 640)
+
+    def test_motion_script_respects_reduced_motion(self):
+        js = (ROOT / "assets/js/motion.js").read_text()
+        self.assertIn("prefers-reduced-motion: reduce", js)
+        self.assertIn("IntersectionObserver", js)
 
     def test_wordmark_has_no_c2pa_metadata(self):
         svg = (ROOT / "assets/img/wordmark.svg").read_text()
@@ -147,6 +166,12 @@ class Home(unittest.TestCase):
         self.assertEqual(len(videos), 1)
         self.assertEqual(videos[0].get("title"), "HitSum launch monitor setup")
         self.assertEqual(videos[0].get("_section"), "setup-steps")
+
+    def test_preview_clips_in_see_it_land_row(self):
+        clips = [v["sources"][0] for v in self.p.videos]
+        self.assertEqual(clips, ["/assets/video/preview-hole.mp4", "/assets/video/preview-analysis.mp4"])
+        self.assertTrue(all(v["_section"] == "features" for v in self.p.videos))
+        self.assertIn("/assets/js/motion.js", self.p.scripts)
 
     def test_links_to_setup(self):
         self.assertIn("/setup/", self.p.links)

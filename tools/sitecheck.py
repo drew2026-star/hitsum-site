@@ -25,6 +25,9 @@ PAGES: dict[str, str | None] = {
 # Other launch monitors: the site never compares itself to them.
 MONITORS = r"garmin|rapsodo|track\s?man|true\s?carry|foresight|sky\s?trak|mevo"
 
+# First-party scripts allowed on a page (must be deferred). Everything else is static.
+ALLOWED_SCRIPTS = {"/assets/js/motion.js"}
+
 # The only third-party content allowed: YouTube's privacy-enhanced player,
 # which sets no cookies until a visitor presses play.
 EMBED_ORIGIN = "https://www.youtube-nocookie.com"
@@ -52,7 +55,9 @@ class Page:
     scripts: list[str] = field(default_factory=list)
     details_count: int = 0
     alts: list[str] = field(default_factory=list)
-    iframes: list[dict[str, str]] = field(default_factory=list)  # attrs + "_section": enclosing section id
+    iframes: list[dict[str, str]] = field(default_factory=list)
+    videos: list[dict] = field(default_factory=list)  # attrs + "sources" + "_section"
+    script_attrs: list[dict[str, str]] = field(default_factory=list)  # attrs + "_section": enclosing section id
     placeholders: list[str] = field(default_factory=list)
 
 
@@ -91,6 +96,11 @@ class _Parser(HTMLParser):
                 p.alts.append(a["alt"])
         elif tag == "section":
             self.sections.append(a.get("id", ""))
+        elif tag == "video":
+            named = [s for s in self.sections if s]
+            p.videos.append({**a, "sources": [], "_section": named[-1] if named else ""})
+        elif tag == "source" and "src" in a and "video" in self.stack and p.videos:
+            p.videos[-1]["sources"].append(a["src"])
         elif tag == "iframe":
             named = [s for s in self.sections if s]
             p.iframes.append({**a, "_section": named[-1] if named else ""})
@@ -101,6 +111,7 @@ class _Parser(HTMLParser):
         elif tag == "script":
             if "src" in a:
                 p.scripts.append(a["src"])
+                p.script_attrs.append(a)
             elif a.get("type") == "application/ld+json":
                 self.capture, self.buf = "jsonld", []
         elif tag == "details":
@@ -205,8 +216,14 @@ def check_page(page: Page, root: Path) -> list[str]:
         problems.append(f"want exactly one h1, found {len(page.h1s)}")
     if "/style.css" not in page.stylesheets:
         problems.append("/style.css not linked")
-    for src in page.scripts:
-        problems.append(f"script not allowed: {src}")
+    for attrs in page.script_attrs:
+        src = attrs["src"]
+        if src not in ALLOWED_SCRIPTS:
+            problems.append(f"script not allowed: {src}")
+        elif not (root / src[1:]).is_file():
+            problems.append(f"script missing: {src}")
+        elif "defer" not in attrs:
+            problems.append(f"script {src} needs defer")
     if page.cta_begin != page.cta_end:
         problems.append(f"CTA markers unbalanced: {page.cta_begin} BEGIN, {page.cta_end} END")
 
@@ -227,6 +244,23 @@ def check_page(page: Page, root: Path) -> list[str]:
 
     for name in page.placeholders:
         problems.append(f"release placeholder {name} left in the page")
+
+    for clip in page.videos:
+        name = clip["sources"][0] if clip["sources"] else "<video>"
+        for attr in ("muted", "playsinline", "loop", "aria-label", "width", "height"):
+            if attr not in clip:
+                problems.append(f"video {name} needs {attr}")
+        if clip.get("preload") != "none":
+            problems.append(f'video {name} needs preload="none"')
+        if "autoplay" in clip:
+            problems.append(f"video {name}: no autoplay attribute; /assets/js/motion.js starts playback")
+        if not clip["sources"]:
+            problems.append("video has no <source>")
+        for url in [clip.get("poster", "")] + clip["sources"]:
+            if not url:
+                problems.append(f"video {name} needs a poster")
+            elif url.startswith("/") and not (root / url[1:]).is_file():
+                problems.append(f"video file missing: {url}")
 
     for frame in page.iframes:
         src = frame.get("src", "")

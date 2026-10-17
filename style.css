@@ -192,3 +192,7 @@ figure:has(> .photo-slot:only-child) { display: none; }
   .setup-grid { grid-template-columns: 320px 1fr; gap: 64px; }
   .steps.steps--stacked { grid-template-columns: 1fr; }
 }
+
+/* Preview clips use the .phone frame; videos need an explicit box. */
+video.phone { display: block; height: auto; background: var(--surface); object-fit: cover; }
+.phones .phone { min-width: 0; flex: 1 1 0; }

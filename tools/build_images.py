@@ -5,6 +5,7 @@ this only needs re-running when a source changes.
     python3 tools/build_images.py
 """
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,6 +24,13 @@ SHOTS = {
 }
 WIDTHS = (480, 960)
 
+# App Store preview recordings -> silent loops for the site.
+PREVIEWS = {
+    "hole": "appstore/upload/preview/iphone-preview-1.mp4",
+    "analysis": "appstore/upload/preview/iphone-preview-2.mp4",
+}
+VIDEO_OUT = OUT.parent / "video"
+
 
 def resized(im, width):
     return im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
@@ -35,6 +43,22 @@ def cover(im, size):
     im = im.resize((round(im.width * scale), round(im.height * scale)), Image.LANCZOS)
     left, top = (im.width - w) // 2, (im.height - h) // 2
     return im.crop((left, top, left + w, top + h))
+
+
+def build_previews() -> None:
+    """640px-wide H.264, no audio, faststart; poster is the first frame."""
+    VIDEO_OUT.mkdir(parents=True, exist_ok=True)
+    for stem, rel in PREVIEWS.items():
+        clip = VIDEO_OUT / f"preview-{stem}.mp4"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(SRC / rel),
+                        "-an", "-vf", "scale=640:-2", "-c:v", "libx264", "-profile:v", "high",
+                        "-pix_fmt", "yuv420p", "-crf", "28", "-preset", "slow",
+                        "-movflags", "+faststart", str(clip)], check=True)
+        frame = VIDEO_OUT / f"preview-{stem}.png"
+        subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(clip),
+                        "-frames:v", "1", str(frame)], check=True)
+        Image.open(frame).convert("RGB").save(VIDEO_OUT / f"preview-{stem}.webp", quality=80)
+        frame.unlink()
 
 
 def main() -> None:
@@ -63,6 +87,8 @@ def main() -> None:
 
     header = Image.open(SRC / "appstore/upload/header-16x9.png").convert("RGB")
     cover(header, (1200, 630)).save(OUT / "og.png", optimize=True)
+
+    build_previews()
 
 
 if __name__ == "__main__":

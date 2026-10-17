@@ -14,13 +14,17 @@ GOOD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <body><h1 id="top">Setup</h1><a href="/setup/#top">x</a></body></html>"""
 
 
-def problems_for(html):
-    """check_page on `html` saved as setup/index.html in a temp site root."""
+def problems_for(html, files=()):
+    """check_page on `html` saved as setup/index.html in a temp site root,
+    with `files` (site-relative paths) present as empty files."""
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
         (root / "setup").mkdir()
         (root / "setup/index.html").write_text(html)
         (root / "style.css").write_text("")
+        for f in files:
+            (root / f).parent.mkdir(parents=True, exist_ok=True)
+            (root / f).write_bytes(b"")
         return check_page(parse_page(html, "setup/index.html"), root)
 
 
@@ -160,6 +164,52 @@ class Iframes(unittest.TestCase):
     def test_iframe_not_lazy_is_reported(self):
         html = with_body(self.NOCOOKIE.replace(' loading="lazy"', ""))
         self.assertTrue(any("lazy" in p for p in problems_for(html)))
+
+
+class Videos(unittest.TestCase):
+    CLIP = ('<video class="phone" muted loop playsinline preload="none" width="640" height="1388" '
+            'poster="/v.webp" aria-label="A clip"><source src="/v.mp4" type="video/mp4"></video>')
+
+    def problems(self, html, files=("v.webp", "v.mp4")):
+        return problems_for(html, files)
+
+    def test_parse_page_collects_videos_and_sources(self):
+        page = parse_page(with_body(self.CLIP))
+        self.assertEqual(page.videos[0]["poster"], "/v.webp")
+        self.assertEqual(page.videos[0]["sources"], ["/v.mp4"])
+
+    def test_good_clip_passes(self):
+        self.assertEqual(self.problems(with_body(self.CLIP)), [])
+
+    def test_missing_poster_or_source_file_is_reported(self):
+        found = self.problems(with_body(self.CLIP), files=())
+        self.assertTrue(any("v.webp" in p for p in found), found)
+        self.assertTrue(any("v.mp4" in p for p in found), found)
+
+    def test_clip_rules_are_enforced(self):
+        for broken, word in [(" muted", "muted"), (" playsinline", "playsinline"),
+                             (' aria-label="A clip"', "aria-label"), (' preload="none"', "preload")]:
+            found = self.problems(with_body(self.CLIP.replace(broken, "")))
+            self.assertTrue(any(word in p for p in found), (word, found))
+
+    def test_autoplay_attribute_is_reported(self):
+        # Playback is the motion script's job, so reduced-motion visitors keep the still frame.
+        found = self.problems(with_body(self.CLIP.replace("<video ", "<video autoplay ")))
+        self.assertTrue(any("autoplay" in p for p in found), found)
+
+
+class Scripts(unittest.TestCase):
+    def test_motion_script_is_allowed_when_present(self):
+        html = GOOD.replace("</head>", '<script src="/assets/js/motion.js" defer></script></head>')
+        self.assertEqual(problems_for(html, ["assets/js/motion.js"]), [])
+
+    def test_motion_script_must_exist(self):
+        html = GOOD.replace("</head>", '<script src="/assets/js/motion.js" defer></script></head>')
+        self.assertTrue(any("script missing" in p for p in problems_for(html)))
+
+    def test_motion_script_must_be_deferred(self):
+        html = GOOD.replace("</head>", '<script src="/assets/js/motion.js"></script></head>')
+        self.assertTrue(any("defer" in p for p in problems_for(html, ["assets/js/motion.js"])))
 
 
 class CheckSite(unittest.TestCase):

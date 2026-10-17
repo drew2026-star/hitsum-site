@@ -1,7 +1,9 @@
 # hitsum.app
 
 Marketing site for HitSum, the iPhone golf launch monitor and shot tracer by Kiki Gadgets Ltd.
-Plain HTML and one stylesheet, served by GitHub Pages behind Cloudflare. No build step, no JavaScript.
+Plain HTML and one stylesheet, served by GitHub Pages behind Cloudflare. No build step. The only
+JavaScript is `assets/js/motion.js`, which plays the preview clips while they're on screen and
+leaves them still for visitors who prefer reduced motion.
 
 - Design spec: `docs/superpowers/specs/2026-10-16-hitsum-marketing-site-design.md`
 - Release-day checklist: `RELEASE.md`
@@ -44,8 +46,8 @@ load lazily; that setup video is the only third-party content on the site.
 
 ## Images
 
-`assets/img` is generated from the app repo (`~/AndroidStudioProjects/golftrace`) and committed.
-Re-run only when a screenshot, the icon or the wordmark changes:
+`assets/img` and `assets/video` are generated from the app repo (`~/AndroidStudioProjects/golftrace`) and committed.
+Re-run only when a screenshot, the icon, the wordmark or an App Store preview changes (needs `ffmpeg`):
 
 ```bash
 python3 tools/build_images.py

@@ -17,6 +17,7 @@
 <link rel="icon" href="/assets/img/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png">
 <link rel="stylesheet" href="/style.css">
+<script src="/assets/js/motion.js" defer></script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"SoftwareApplication","name":"HitSum","operatingSystem":"iOS","applicationCategory":"SportsApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"publisher":{"@type":"Organization","name":"Kiki Gadgets Ltd"}}
 </script>
@@ -80,16 +81,16 @@
 
       <div class="feature">
         <div class="phones">
-          <picture>
-            <source type="image/webp" srcset="/assets/img/shot-hole-480.webp 480w, /assets/img/shot-hole-960.webp 960w" sizes="(min-width: 768px) 260px, 45vw">
-            <img class="phone" src="/assets/img/shot-hole-960.png" width="960" height="2081" loading="lazy"
-              alt="A 3D fairway view showing a driver shot that finished 39 yards from the 215 yard pin">
-          </picture>
-          <picture>
-            <source type="image/webp" srcset="/assets/img/shot-analysis-480.webp 480w, /assets/img/shot-analysis-960.webp 960w" sizes="(min-width: 768px) 260px, 45vw">
-            <img class="phone" src="/assets/img/shot-analysis-960.png" width="960" height="2081" loading="lazy"
-              alt="Club analysis listing the usual carry range for each club, from 3 wood at 167 yards down to lob wedge">
-          </picture>
+          <video class="phone clip" muted loop playsinline preload="none" width="640" height="1386"
+            poster="/assets/video/preview-hole.webp"
+            aria-label="Shots replayed on a 3D fairway, club by club, with carry, total and distance to the pin">
+            <source src="/assets/video/preview-hole.mp4" type="video/mp4">
+          </video>
+          <video class="phone clip" muted loop playsinline preload="none" width="640" height="1386"
+            poster="/assets/video/preview-analysis.webp"
+            aria-label="Club analysis, a 9 iron's carry over time and where its shots landed, then saved sessions">
+            <source src="/assets/video/preview-analysis.mp4" type="video/mp4">
+          </video>
         </div>
         <div>
           <h3>See it land. Know your bag.</h3>
