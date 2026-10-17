@@ -48,8 +48,8 @@ privacy-enhanced player (`youtube-nocookie.com`), carry a `title` and load lazil
 
 `assets/img` and `assets/video` are generated from the app repo (`~/AndroidStudioProjects/golftrace`) and committed.
 Re-run only when a screenshot, the icon, the wordmark, an App Store preview, the setup video
-(`~/Documents/hitsum1-short.mp4`) or the tracer recording (`~/Downloads/DA0025FB-…MP4`)
-changes (needs `ffmpeg`). Cut points live at the top of the script:
+(`~/Documents/hitsum1-short.mp4`) the tracer recording (`~/Downloads/DA0025FB-…MP4`) or the
+kit photo (`~/Downloads/PXL_20261010_220955627.PORTRAIT.jpg`) changes (needs `ffmpeg`). Cut points live at the top of the script:
 
 ```bash
 python3 tools/build_images.py

@@ -9,7 +9,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 
 GOLFTRACE = Path.home() / "AndroidStudioProjects/golftrace"
 SRC = GOLFTRACE / "design"
@@ -134,6 +134,53 @@ def build_setup_loop() -> None:
     poster(clip, SETUP_POSTER_AT)
 
 
+# The bag-mount kit: phone holder clamped to the bag, mini umbrella above.
+# Cropped (in source pixels) to leave out the headcover's team logo.
+KIT_SOURCE = Path.home() / "Downloads/PXL_20261010_220955627.PORTRAIT.jpg"
+KIT_CROP = (0, 205, 2388, 4417)
+FONTS = GOLFTRACE / "ios/GolfTraceApp/GolfTraceApp/Theme/Fonts"
+LIME, INK, WHITE = (200, 245, 66), (18, 19, 21), (236, 237, 238)
+# (title, detail, pill top-left, point on the photo), in the 960-wide output
+KIT_CALLOUTS = (
+    ("Mini umbrella", "Shade, less glare", (24, 540), (560, 440)),
+    ("Phone holder", "Clamps to your bag", (24, 1010), (812, 1330)),
+)
+
+
+def callout(im: Image.Image, title: str, detail: str, at, target) -> None:
+    d = ImageDraw.Draw(im, "RGBA")
+    # Sized to stay readable when the photo shows ~335px wide on a phone.
+    big_px, small_px = 50, 38
+    big = ImageFont.truetype(str(FONTS / "IBMPlexSans-SemiBold.otf"), big_px)
+    small = ImageFont.truetype(str(FONTS / "IBMPlexSans-Medium.otf"), small_px)
+    pad, gap = 24, 8
+    w = int(max(d.textlength(title, font=big), d.textlength(detail, font=small))) + 2 * pad
+    h = big_px + gap + small_px + 2 * pad + 8
+    x, y = at
+    anchor = (x + w, y + h // 2)
+    for width, colour in ((10, (*INK, 200)), (4, (*LIME, 255))):  # dark halo under the lime line
+        d.line([anchor, target], fill=colour, width=width)
+    for r, colour in ((16, (*INK, 200)), (11, (*LIME, 255)), (5, (*INK, 255))):
+        d.ellipse([target[0] - r, target[1] - r, target[0] + r, target[1] + r], fill=colour)
+    d.rounded_rectangle([x, y, x + w, y + h], radius=22, fill=(*INK, 225), outline=(*LIME, 255), width=3)
+    d.text((x + pad, y + pad - 4), title, font=big, fill=LIME)
+    d.text((x + pad, y + pad + big_px + gap), detail, font=small, fill=WHITE)
+
+
+def build_kit_photo() -> None:
+    """Crop, annotate and save the kit photo. Saved fresh, so no EXIF or other
+    metadata from the camera comes along."""
+    im = Image.open(KIT_SOURCE).convert("RGB").crop(KIT_CROP)
+    im = resized(im, 960)
+    for title, detail, at, target in KIT_CALLOUTS:
+        callout(im, title, detail, at, target)
+    clean = Image.new("RGB", im.size)
+    clean.paste(im)
+    clean.save(OUT / "kit-960.jpg", quality=82, optimize=True, progressive=True)
+    clean.save(OUT / "kit-960.webp", quality=80)
+    resized(clean, 480).save(OUT / "kit-480.webp", quality=80)
+
+
 def main() -> None:
     # Real-device captures get the simulator's clean 9:41 status bar, exactly
     # as the App Store screenshots do.
@@ -164,6 +211,7 @@ def main() -> None:
     build_previews()
     build_setup_loop()
     build_trace_clip()
+    build_kit_photo()
 
 
 if __name__ == "__main__":

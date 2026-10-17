@@ -101,6 +101,13 @@ class SiteFiles(unittest.TestCase):
             self.assertEqual(Image.open(f).width, 480, f.name)
         self.assertLess(sum(f.stat().st_size for f in posters), 100_000)
 
+    def test_kit_photo_outputs_have_no_metadata(self):
+        for f in ["kit-480.webp", "kit-960.webp", "kit-960.jpg"]:
+            im = Image.open(ROOT / "assets/img" / f)
+            self.assertEqual(len(im.getexif()), 0, f)
+            self.assertNotIn("exif", im.info, f)
+        self.assertEqual(Image.open(ROOT / "assets/img/kit-960.jpg").width, 960)
+
     def test_motion_script_respects_reduced_motion(self):
         js = (ROOT / "assets/js/motion.js").read_text()
         self.assertIn("prefers-reduced-motion: reduce", js)
@@ -198,6 +205,10 @@ class Home(unittest.TestCase):
         # Every iPhone the launch monitor supports films slow motion, so no FAQ for it.
         self.assertNotIn("faq-slowmo", self.p.ids)
 
+    def test_setup_step_mentions_bag_mount(self):
+        self.assertIn("Clip your phone to your bag", self.p.text)
+        self.assertIn("no tripod needed", self.p.text)
+
     def test_setup_steps_match_app(self):
         for s in ["directly behind the ball", "7.5 ft (2.3 m)", "two driver lengths"]:
             self.assertIn(s, self.p.text)
@@ -284,6 +295,19 @@ class Setup(unittest.TestCase):
 
     def test_title_and_h1(self):
         self.assertEqual(self.p.h1s, ["Set up HitSum"])
+
+    def test_what_you_need(self):
+        self.assertIn("what-you-need", self.p.ids)
+        self.assertIn("No tripod needed", self.p.text)
+        amazon = [h for h in self.p.links if h.startswith("https://www.amazon.com/s?k=")]
+        self.assertEqual(len(amazon), 2)
+
+    def test_kit_photo_fills_the_secured_phone_slot(self):
+        html = (ROOT / "setup/index.html").read_text()
+        slot = html[html.index('id="photo-securedPhone"'):]
+        slot = slot[:slot.index("</figure>")]
+        self.assertIn("/assets/img/kit-960.jpg", slot)
+        self.assertNotIn("photo-slot", slot)
 
     def test_trace_clip_in_shot_tracer_section(self):
         assert_trace_clip(self, self.p, "shot-tracer")

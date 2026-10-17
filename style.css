@@ -206,3 +206,6 @@ video.phone { display: block; height: auto; background: var(--surface); object-f
 }
 .sound-toggle:hover { border-color: var(--lime); }
 .prose figure.video-frame { margin-inline: auto; }
+
+/* Annotated kit photo on the Setup page */
+.kit-photo { width: 100%; max-width: 420px; margin: 0 auto; border-radius: var(--radius); }
