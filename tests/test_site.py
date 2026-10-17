@@ -286,8 +286,8 @@ class Setup(unittest.TestCase):
     def test_distance_copy(self):
         self.assertIn("7.5 ft (2.3 m)", self.p.text)
         self.assertIn("two driver lengths", self.p.text)
-        self.assertIn("A foot off at 7.5 ft puts every number off by", self.p.text)
-        self.assertIn("eighth", self.p.text)
+        self.assertIn("A foot off at 7.5 ft puts every number off by 13%.", self.p.text)
+        self.assertNotIn("eighth", self.p.text)
 
     def test_troubleshooting_items(self):
         for s in ["Too dark", "Not the ball", "sideways", "Missed"]:

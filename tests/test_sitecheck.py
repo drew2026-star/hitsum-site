@@ -90,6 +90,14 @@ class CheckCopy(unittest.TestCase):
     def test_copy_flags_percentage(self):
         self.assertEqual(check_copy("off by 13%"), ["percentage"])
 
+    def test_copy_allows_the_apps_distance_sentence_only(self):
+        # Arithmetic about measuring the distance, verbatim from the app (GolferCopy.distanceWhy),
+        # not an accuracy claim. Any other percentage, even next to it, is still flagged.
+        sentence = "A foot off at 7.5 ft puts every number off by 13%."
+        self.assertEqual(check_copy(sentence), [])
+        self.assertEqual(check_copy(sentence + " Accurate to 2%."), ["percentage"])
+        self.assertEqual(check_copy("A foot off at 7.5 ft puts every number off by 12.5%."), ["percentage"])
+
     def test_copy_flags_r10_garmin_price_sideon(self):
         self.assertEqual(check_copy("matches an R10"), ["monitor comparison"])
         self.assertEqual(check_copy("like a Garmin"), ["monitor comparison"])

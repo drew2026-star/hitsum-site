@@ -25,6 +25,12 @@ PAGES: dict[str, str | None] = {
 # Other launch monitors: the site never compares itself to them.
 MONITORS = r"garmin|rapsodo|track\s?man|true\s?carry|foresight|sky\s?trak|mevo"
 
+# The only percentages allowed: exact sentences that are arithmetic, not accuracy
+# claims. Verbatim from the app's own copy (GolferCopy.distanceWhy).
+APPROVED_PERCENT_SENTENCES = (
+    "A foot off at 7.5 ft puts every number off by 13%.",
+)
+
 # First-party scripts allowed on a page (must be deferred). Everything else is static.
 ALLOWED_SCRIPTS = {"/assets/js/motion.js"}
 
@@ -167,6 +173,8 @@ def parse_page(html: str, path: str = "") -> Page:
 
 def check_copy(text: str) -> list[str]:
     problems = []
+    for sentence in APPROVED_PERCENT_SENTENCES:
+        text = text.replace(sentence, "")
     if re.search(r"\d\s?(%|per\s?cent)", text, re.I):
         problems.append("percentage")
     if re.search(r"\bR10\b", text) or re.search(MONITORS, text, re.I):

@@ -39,7 +39,8 @@ python3 tools/sitecheck.py
 ```
 
 `sitecheck` enforces titles, descriptions, canonical and social tags, one H1 per page, image
-alt/size attributes, internal links and anchors, and the copy rules: no accuracy percentages,
+alt/size attributes, internal links and anchors, and the copy rules: no percentages (except the
+app's exact "off by 13%" distance sentence, listed in `APPROVED_PERCENT_SENTENCES`),
 no comparisons with other launch monitors, no prices, no "side-on", and no Android claims.
 The site makes no third-party requests. If an iframe is ever added it must use YouTube's
 privacy-enhanced player (`youtube-nocookie.com`), carry a `title` and load lazily.
