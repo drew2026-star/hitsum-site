@@ -31,6 +31,13 @@ PREVIEWS = {
 }
 VIDEO_OUT = OUT.parent / "video"
 
+# The setup Short (also on YouTube as DiPGG06o8gQ). The loop keeps 0-5.0 s
+# (setting up) and 10.5 s-end (swing, number, the app calling the distance),
+# cutting the walk to the ball. Audio stays for the page's "Sound on" button.
+SETUP_SOURCE = Path.home() / "Documents/hitsum1-short.mp4"
+SETUP_KEEP = ((0.0, 5.0), (10.5, None))
+SETUP_POSTER_AT = 4.5  # in the cut: phone mounted and shaded, "Ready", ball in view
+
 
 def resized(im, width):
     return im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
@@ -61,6 +68,27 @@ def build_previews() -> None:
         frame.unlink()
 
 
+def build_setup_loop() -> None:
+    parts, inputs = [], []
+    for i, (start, end) in enumerate(SETUP_KEEP):
+        span = f"{start}:{end}" if end is not None else f"start={start}"
+        parts.append(f"[0:v]trim={span},setpts=PTS-STARTPTS[v{i}];"
+                     f"[0:a]atrim={span},asetpts=PTS-STARTPTS[a{i}];")
+        inputs.append(f"[v{i}][a{i}]")
+    graph = "".join(parts) + "".join(inputs) + f"concat=n={len(SETUP_KEEP)}:v=1:a=1[v][a]"
+    clip = VIDEO_OUT / "setup-loop.mp4"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-i", str(SETUP_SOURCE),
+                    "-filter_complex", graph, "-map", "[v]", "-map", "[a]",
+                    "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p",
+                    "-crf", "26", "-preset", "slow", "-c:a", "aac", "-b:a", "96k",
+                    "-movflags", "+faststart", str(clip)], check=True)
+    frame = VIDEO_OUT / "setup-loop.png"
+    subprocess.run(["ffmpeg", "-loglevel", "error", "-y", "-ss", str(SETUP_POSTER_AT), "-i", str(clip),
+                    "-frames:v", "1", str(frame)], check=True)
+    Image.open(frame).convert("RGB").save(VIDEO_OUT / "setup-loop.webp", quality=80)
+    frame.unlink()
+
+
 def main() -> None:
     # Real-device captures get the simulator's clean 9:41 status bar, exactly
     # as the App Store screenshots do.
@@ -89,6 +117,7 @@ def main() -> None:
     cover(header, (1200, 630)).save(OUT / "og.png", optimize=True)
 
     build_previews()
+    build_setup_loop()
 
 
 if __name__ == "__main__":

@@ -17,6 +17,7 @@
 <link rel="icon" href="/assets/img/favicon-32.png">
 <link rel="apple-touch-icon" href="/assets/img/icon-180.png">
 <link rel="stylesheet" href="/style.css">
+<script src="/assets/js/motion.js" defer></script>
 </head>
 <body>
 <header class="site-header"><div class="wrap nav">
@@ -39,10 +40,15 @@
   <section id="launch-monitor">
     <h2>Launch monitor</h2>
     <figure class="video-frame">
-      <iframe class="video" src="https://www.youtube-nocookie.com/embed/DiPGG06o8gQ?rel=0&amp;playsinline=1" title="HitSum launch monitor setup"
-        width="320" height="569" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"
-        allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-      <figcaption>Phone in a bag mount, shaded, directly behind the ball.</figcaption>
+      <div class="clip-box">
+        <video class="phone clip" data-sound muted loop playsinline preload="none" width="608" height="1080"
+          poster="/assets/video/setup-loop.webp"
+          aria-label="Setting up HitSum: the phone goes in a shaded bag mount behind the ball, the app says Ready, then a swing and the carry appears">
+          <source src="/assets/video/setup-loop.mp4" type="video/mp4">
+        </video>
+        <button type="button" class="sound-toggle" hidden>Sound on</button>
+      </div>
+      <figcaption>Phone in a bag mount, shaded, directly behind the ball. <a href="https://www.youtube.com/shorts/DiPGG06o8gQ">Full video on YouTube</a></figcaption>
     </figure>
 
     <!-- TutorialArt slot: securedPhone -->

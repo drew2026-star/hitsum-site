@@ -70,6 +70,17 @@ class SiteFiles(unittest.TestCase):
             poster = Image.open(ROOT / f"assets/video/preview-{stem}.webp")
             self.assertEqual(poster.width, 640)
 
+    def test_setup_loop_is_the_cut_with_sound(self):
+        clip = ROOT / "assets/video/setup-loop.mp4"
+        self.assertLess(clip.stat().st_size, 3_000_000)
+        info = json.loads(subprocess.run(
+            ["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)],
+            capture_output=True, text=True, check=True).stdout)
+        self.assertEqual(sorted(st["codec_type"] for st in info["streams"]), ["audio", "video"])
+        # 0-5.0 s setup + 10.5-15.6 s swing and spoken distance; the walk to the ball is cut.
+        self.assertAlmostEqual(float(info["format"]["duration"]), 10.1, delta=0.15)
+        self.assertTrue((ROOT / "assets/video/setup-loop.webp").is_file())
+
     def test_motion_script_respects_reduced_motion(self):
         js = (ROOT / "assets/js/motion.js").read_text()
         self.assertIn("prefers-reduced-motion: reduce", js)
@@ -111,11 +122,23 @@ class SiteFiles(unittest.TestCase):
         self.assertEqual(page_problems("404.html"), [])
 
 
-SETUP_VIDEO = "https://www.youtube-nocookie.com/embed/DiPGG06o8gQ"
+SETUP_CLIP = "/assets/video/setup-loop.mp4"
+SETUP_ON_YOUTUBE = "https://www.youtube.com/shorts/DiPGG06o8gQ"
 
 
-def setup_videos(p):
-    return [f for f in p.iframes if f.get("src", "").startswith(SETUP_VIDEO)]
+def setup_clips(p):
+    return [v for v in p.videos if v["sources"] == [SETUP_CLIP]]
+
+
+def assert_setup_clip(test, p, section):
+    """The self-hosted setup loop, in `section`, with its sound button and YouTube link."""
+    clips = setup_clips(p)
+    test.assertEqual(len(clips), 1)
+    test.assertEqual(clips[0]["_section"], section)
+    test.assertIn("data-sound", clips[0])
+    test.assertIn(SETUP_ON_YOUTUBE, p.links)
+    test.assertEqual(p.iframes, [])  # no YouTube player: the site makes no third-party requests
+    test.assertIn("/assets/js/motion.js", p.scripts)
 
 
 class Home(unittest.TestCase):
@@ -167,16 +190,14 @@ class Home(unittest.TestCase):
         self.assertEqual(order, ["setup-steps", "features", "honest", "free-premium", "faq"])
         self.assertLess(html.index('class="wrap hero"'), html.index('id="setup-steps"'))
 
-    def test_setup_video_in_setup_steps(self):
-        videos = setup_videos(self.p)
-        self.assertEqual(len(videos), 1)
-        self.assertEqual(videos[0].get("title"), "HitSum launch monitor setup")
-        self.assertEqual(videos[0].get("_section"), "setup-steps")
+    def test_setup_clip_in_setup_steps(self):
+        assert_setup_clip(self, self.p, "setup-steps")
 
     def test_preview_clips_in_see_it_land_row(self):
-        clips = [v["sources"][0] for v in self.p.videos]
-        self.assertEqual(clips, ["/assets/video/preview-hole.mp4", "/assets/video/preview-analysis.mp4"])
-        self.assertTrue(all(v["_section"] == "features" for v in self.p.videos))
+        previews = [v for v in self.p.videos if v["sources"][0].startswith("/assets/video/preview-")]
+        self.assertEqual([v["sources"][0] for v in previews],
+                         ["/assets/video/preview-hole.mp4", "/assets/video/preview-analysis.mp4"])
+        self.assertTrue(all(v["_section"] == "features" for v in previews))
         self.assertIn("/assets/js/motion.js", self.p.scripts)
 
     def test_links_to_setup(self):
@@ -227,10 +248,8 @@ class Setup(unittest.TestCase):
     def test_title_and_h1(self):
         self.assertEqual(self.p.h1s, ["Set up HitSum"])
 
-    def test_setup_video_in_launch_monitor_section(self):
-        videos = setup_videos(self.p)
-        self.assertEqual(len(videos), 1)
-        self.assertEqual(videos[0].get("_section"), "launch-monitor")
+    def test_setup_clip_in_launch_monitor_section(self):
+        assert_setup_clip(self, self.p, "launch-monitor")
 
 
 class Support(unittest.TestCase):

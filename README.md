@@ -2,8 +2,8 @@
 
 Marketing site for HitSum, the iPhone golf launch monitor and shot tracer by Kiki Gadgets Ltd.
 Plain HTML and one stylesheet, served by GitHub Pages behind Cloudflare. No build step. The only
-JavaScript is `assets/js/motion.js`, which plays the preview clips while they're on screen and
-leaves them still for visitors who prefer reduced motion.
+JavaScript is `assets/js/motion.js`, which plays the video clips while they're on screen, leaves
+them still for visitors who prefer reduced motion, and runs the setup clip's "Sound on" button.
 
 - Design spec: `docs/superpowers/specs/2026-10-16-hitsum-marketing-site-design.md`
 - Release-day checklist: `RELEASE.md`
@@ -41,13 +41,14 @@ python3 tools/sitecheck.py
 `sitecheck` enforces titles, descriptions, canonical and social tags, one H1 per page, image
 alt/size attributes, internal links and anchors, and the copy rules: no accuracy percentages,
 no comparisons with other launch monitors, no prices, no "side-on", and no Android claims.
-Iframes must use YouTube's privacy-enhanced player (`youtube-nocookie.com`), carry a `title` and
-load lazily; that setup video is the only third-party content on the site.
+The site makes no third-party requests. If an iframe is ever added it must use YouTube's
+privacy-enhanced player (`youtube-nocookie.com`), carry a `title` and load lazily.
 
 ## Images
 
 `assets/img` and `assets/video` are generated from the app repo (`~/AndroidStudioProjects/golftrace`) and committed.
-Re-run only when a screenshot, the icon, the wordmark or an App Store preview changes (needs `ffmpeg`):
+Re-run only when a screenshot, the icon, the wordmark, an App Store preview or the setup video
+(`~/Documents/hitsum1-short.mp4`) changes (needs `ffmpeg`):
 
 ```bash
 python3 tools/build_images.py

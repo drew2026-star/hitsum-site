@@ -196,3 +196,13 @@ figure:has(> .photo-slot:only-child) { display: none; }
 /* Preview clips use the .phone frame; videos need an explicit box. */
 video.phone { display: block; height: auto; background: var(--surface); object-fit: cover; }
 .phones .phone { min-width: 0; flex: 1 1 0; }
+
+/* Sound button over the setup clip (shown by motion.js) */
+.clip-box { position: relative; }
+.sound-toggle {
+  position: absolute; left: 12px; bottom: 12px; min-height: 44px; padding: 10px 16px;
+  border: 1px solid var(--line); border-radius: 999px; cursor: pointer;
+  background: rgba(18, 19, 21, 0.78); color: var(--text); font: 600 0.9rem/1 var(--sans);
+}
+.sound-toggle:hover { border-color: var(--lime); }
+.prose figure.video-frame { margin-inline: auto; }
