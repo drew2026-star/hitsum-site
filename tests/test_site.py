@@ -67,8 +67,7 @@ class SiteFiles(unittest.TestCase):
                 capture_output=True, text=True, check=True).stdout)["streams"]
             self.assertEqual([st["codec_type"] for st in probe], ["video"], clip.name)
             self.assertEqual((probe[0]["codec_name"], probe[0]["width"]), ("h264", 640))
-            poster = Image.open(ROOT / f"assets/video/preview-{stem}.webp")
-            self.assertEqual(poster.width, 640)
+            self.assertTrue((ROOT / f"assets/video/preview-{stem}.webp").is_file())
 
     def test_setup_loop_is_the_cut_with_sound(self):
         clip = ROOT / "assets/video/setup-loop.mp4"
@@ -80,6 +79,27 @@ class SiteFiles(unittest.TestCase):
         # 0-5.0 s setup + 10.5-15.6 s swing and spoken distance; the walk to the ball is cut.
         self.assertAlmostEqual(float(info["format"]["duration"]), 10.1, delta=0.15)
         self.assertTrue((ROOT / "assets/video/setup-loop.webp").is_file())
+
+    def test_trace_clip_is_the_silent_cut(self):
+        clip = ROOT / "assets/video/trace-steps.mp4"
+        self.assertLess(clip.stat().st_size, 2_000_000)
+        info = json.loads(subprocess.run(
+            ["ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(clip)],
+            capture_output=True, text=True, check=True).stdout)
+        self.assertEqual([st["codec_type"] for st in info["streams"]], ["video"])
+        self.assertEqual(info["streams"][0]["width"], 640)
+        # 2.5-4.0 + 4.6-7.6 + 18.0-20.5 + 23.8-30.4 s of the recording
+        self.assertAlmostEqual(float(info["format"]["duration"]), 13.6, delta=0.15)
+        self.assertTrue((ROOT / "assets/video/trace-steps.webp").is_file())
+
+    def test_posters_are_light(self):
+        # Posters can't be lazy-loaded: every one downloads with the hero screenshot.
+        # Four full-size posters (190 KB) pushed Home's mobile LCP from 2.2 s to 2.6 s.
+        posters = sorted((ROOT / "assets/video").glob("*.webp"))
+        self.assertEqual(len(posters), 4)
+        for f in posters:
+            self.assertEqual(Image.open(f).width, 480, f.name)
+        self.assertLess(sum(f.stat().st_size for f in posters), 100_000)
 
     def test_motion_script_respects_reduced_motion(self):
         js = (ROOT / "assets/js/motion.js").read_text()
@@ -128,6 +148,18 @@ SETUP_ON_YOUTUBE = "https://www.youtube.com/shorts/DiPGG06o8gQ"
 
 def setup_clips(p):
     return [v for v in p.videos if v["sources"] == [SETUP_CLIP]]
+
+
+TRACE_CLIP = "/assets/video/trace-steps.mp4"
+
+
+def assert_trace_clip(test, p, section):
+    """The silent tracer walkthrough replaces the still tracer screenshot in `section`."""
+    clips = [v for v in p.videos if v["sources"] == [TRACE_CLIP]]
+    test.assertEqual(len(clips), 1)
+    test.assertEqual(clips[0]["_section"], section)
+    test.assertNotIn("data-sound", clips[0])
+    test.assertFalse(any("shot-trace" in i.get("src", "") for i in p.images if i["tag"] == "img"))
 
 
 def assert_setup_clip(test, p, section):
@@ -192,6 +224,9 @@ class Home(unittest.TestCase):
         self.assertEqual(order, ["setup-steps", "features", "honest", "free-premium", "faq"])
         self.assertLess(html.index('class="wrap hero"'), html.index('id="setup-steps"'))
 
+    def test_trace_clip_in_features(self):
+        assert_trace_clip(self, self.p, "features")
+
     def test_setup_clip_in_setup_steps(self):
         assert_setup_clip(self, self.p, "setup-steps")
 
@@ -249,6 +284,9 @@ class Setup(unittest.TestCase):
 
     def test_title_and_h1(self):
         self.assertEqual(self.p.h1s, ["Set up HitSum"])
+
+    def test_trace_clip_in_shot_tracer_section(self):
+        assert_trace_clip(self, self.p, "shot-tracer")
 
     def test_setup_clip_in_launch_monitor_section(self):
         assert_setup_clip(self, self.p, "launch-monitor")

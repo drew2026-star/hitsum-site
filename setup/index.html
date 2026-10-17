@@ -94,17 +94,18 @@
   <section id="shot-tracer">
     <h2>Shot tracer</h2>
     <figure>
-      <picture>
-        <source type="image/webp" srcset="/assets/img/shot-trace-480.webp 480w, /assets/img/shot-trace-960.webp 960w" sizes="(min-width: 768px) 320px, 80vw">
-        <img class="phone" src="/assets/img/shot-trace-960.png" width="960" height="2081" loading="lazy"
-          alt="A finished trace: the flight line drawn over a down-the-line swing video with a carry callout">
-      </picture>
+      <video class="phone clip" muted loop playsinline preload="none" width="640" height="1386"
+        poster="/assets/video/trace-steps.webp"
+        aria-label="Tracing a shot in HitSum: confirm the moment of impact, drag the magnifier onto the ball, drag the path's end to where it landed, then the traced swing plays">
+        <source src="/assets/video/trace-steps.mp4" type="video/mp4">
+      </video>
     </figure>
     <ol>
       <li><strong>Hold still.</strong> Film down the line with the ball low in the frame, and don't follow the ball with the camera.</li>
-      <li><strong>Record, then mark.</strong> Slide the ball under the crosshair so it's ringed.</li>
-      <li><strong>Check, then trace.</strong> HitSum draws the flight line over your video.</li>
-      <li><strong>Share it.</strong> Add your carry and total, then save or send the clip.</li>
+      <li><strong>Confirm impact.</strong> HitSum finds the strike and asks: is this the moment the ball is hit?</li>
+      <li><strong>Drag the magnifier onto the ball.</strong> HitSum follows its flight from there. To correct a point, mark the ball again with the magnifier.</li>
+      <li><strong>Drag the end to where it landed.</strong> Pull the end of the path to the landing spot, then tap Done.</li>
+      <li><strong>Save and share.</strong> Tap Save traced clip, add your carry and total, and send it.</li>
     </ol>
   </section>
 

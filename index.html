@@ -94,14 +94,14 @@
       </div>
 
       <div class="feature feature--flip">
-        <picture>
-          <source type="image/webp" srcset="/assets/img/shot-trace-480.webp 480w, /assets/img/shot-trace-960.webp 960w" sizes="(min-width: 768px) 320px, 80vw">
-          <img class="phone" src="/assets/img/shot-trace-960.png" width="960" height="2081" loading="lazy"
-            alt="A down-the-line swing video with a red traced ball flight and a 196 yard carry callout">
-        </picture>
+        <video class="phone clip" muted loop playsinline preload="none" width="640" height="1386"
+          poster="/assets/video/trace-steps.webp"
+          aria-label="Tracing a shot in HitSum: confirm the moment of impact, drag the magnifier onto the ball, drag the path's end to where it landed, then the traced swing plays">
+          <source src="/assets/video/trace-steps.mp4" type="video/mp4">
+        </video>
         <div>
           <h3>Shot tracer</h3>
-          <p>Film a swing, tap the ball, and HitSum draws the flight line over your video.</p>
+          <p>Film a swing, mark the ball, and HitSum draws the flight line over your video.</p>
           <p>Add your carry and share a clip your friends will actually watch. The tracer is always free.</p>
         </div>
       </div>
