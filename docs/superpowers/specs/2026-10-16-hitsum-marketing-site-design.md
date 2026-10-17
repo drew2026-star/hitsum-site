@@ -90,7 +90,6 @@ The sections, in order:
    - *Premium:* unlimited shots, full shot history, per-club analysis, exports without a watermark, and hosting a Join session. Monthly or yearly, and yearly includes a 7-day free trial. No prices.
 6. **FAQ.** Uses native `<details>`/`<summary>`.
    - Which iPhones work? 12 or later for the launch monitor; iPads and older iPhones on iOS 17.2+ can watch a Join session.
-   - Do I need slow motion? Yes, 240 fps.
    - Does it work indoors? Yes, 8–10 ft from a net or screen.
    - How accurate is it? Measured from high-speed video; carry assumes typical spin. No percentages.
    - Does it measure spin? No. Spin is estimated.

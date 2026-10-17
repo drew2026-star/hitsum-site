@@ -160,9 +160,11 @@ class Home(unittest.TestCase):
         self.assertLessEqual({"features", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)
 
     def test_faq_items(self):
-        self.assertEqual(self.p.details_count, 8)
-        for i in ["iphones", "slowmo", "indoors", "accuracy", "spin", "altitude", "android", "free"]:
+        self.assertEqual(self.p.details_count, 7)
+        for i in ["iphones", "indoors", "accuracy", "spin", "altitude", "android", "free"]:
             self.assertIn(f"faq-{i}", self.p.ids)
+        # Every iPhone the launch monitor supports films slow motion, so no FAQ for it.
+        self.assertNotIn("faq-slowmo", self.p.ids)
 
     def test_setup_steps_match_app(self):
         for s in ["directly behind the ball", "7.5 ft (2.3 m)", "two driver lengths"]:
