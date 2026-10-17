@@ -161,6 +161,12 @@ class Home(unittest.TestCase):
         self.assertEqual(app["offers"]["price"], "0")
         self.assertNotIn("aggregateRating", app)
 
+    def test_setup_video_section_comes_right_after_the_hero(self):
+        html = (ROOT / "index.html").read_text()
+        order = re.findall(r'<section[^>]*\bid="([^"]+)"', html)
+        self.assertEqual(order, ["setup-steps", "features", "honest", "free-premium", "faq"])
+        self.assertLess(html.index('class="wrap hero"'), html.index('id="setup-steps"'))
+
     def test_setup_video_in_setup_steps(self):
         videos = setup_videos(self.p)
         self.assertEqual(len(videos), 1)
