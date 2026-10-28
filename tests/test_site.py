@@ -370,7 +370,29 @@ class Privacy(unittest.TestCase):
         self.assertEqual(self.p.h2s, want)
 
     def test_effective_date(self):
-        self.assertIn("September 25, 2026", self.p.text)
+        self.assertIn("October 27, 2026", self.p.text)
+
+    @unittest.skipUnless(SRC_MD.exists(), "golftrace repo not on this machine")
+    def test_every_line_of_the_policy_is_on_the_page(self):
+        def plain(line):
+            line = re.sub(r"^(#+ |- )", "", line.strip())
+            line = line.replace("**", "")
+            if line.startswith("|"):
+                if set(line) <= set("|-: "):
+                    return ""
+                line = " ".join(c.strip() for c in line.strip("|").split("|"))
+            return " ".join(line.split())
+        # The text extractor joins tag boundaries with a space ("<strong>x</strong>." -> "x .").
+        text = re.sub(r" ([.,;:)])", r"\1", " ".join(self.p.text.split()))
+        for line in SRC_MD.read_text().splitlines():
+            want = plain(line)
+            if want:
+                self.assertIn(want, text)
+
+    def test_page_is_generated_between_markers(self):
+        html = (ROOT / "privacy/index.html").read_text()
+        self.assertEqual(html.count("<!-- POLICY:BEGIN"), 1)
+        self.assertEqual(html.count("<!-- POLICY:END -->"), 1)
 
     def test_h1(self):
         self.assertEqual(self.p.h1s, ["HitSum Privacy Policy"])

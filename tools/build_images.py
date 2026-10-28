@@ -71,8 +71,8 @@ def build_previews() -> None:
 TRACE_SOURCE = Path.home() / "Downloads/DA0025FB-C240-4A65-94DE-62A466F8F978.MP4"
 TRACE_KEEP = ((2.5, 4.0), (4.6, 7.6), (18.0, 20.5), (23.8, 30.4))
 TRACE_POSTER_AT = 12.4  # in the cut: the finished trace line over the follow-through
-STATUS_BAR_H = 165
-POSTER_WIDTH = 480  # rows above the app's content in a 3x recording
+STATUS_BAR_H = 165  # rows above the app's content in a 3x recording
+POSTER_WIDTH = 480
 
 
 def clean_bar(width: int) -> Path:

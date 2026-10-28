@@ -56,10 +56,22 @@ kit photo (`~/Downloads/PXL_20261010_220955627.PORTRAIT.jpg`) changes (needs `ff
 python3 tools/build_images.py
 ```
 
+## Privacy policy
+
+`privacy/index.html` is generated from the app repo's `docs/legal/privacy.md`. After the policy
+changes there, run:
+
+```bash
+python3 tools/build_privacy.py
+```
+
+It replaces only the part between the `POLICY` markers. The tests check every line of the
+Markdown appears on the page.
+
 ## Copy source of truth
 
 Setup wording follows the app: `ios/Sources/GolfTraceAppCore/Tutorial.swift` and `GolferCopy.swift`
-in the golftrace repo. The privacy page is `docs/legal/privacy.md` there.
+in the golftrace repo.
 
 ## Publish
 
