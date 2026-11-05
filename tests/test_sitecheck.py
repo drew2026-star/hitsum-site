@@ -220,6 +220,27 @@ class Scripts(unittest.TestCase):
         self.assertTrue(any("defer" in p for p in problems_for(html, ["assets/js/motion.js"])))
 
 
+BEACON = ('<script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+          'data-cf-beacon=\'{"token": "0123456789abcdef0123456789abcdef"}\'></script>')
+
+
+class Analytics(unittest.TestCase):
+    def test_cloudflare_beacon_is_allowed(self):
+        self.assertEqual(problems_for(GOOD.replace("</head>", BEACON + "</head>")), [])
+
+    def test_beacon_must_be_deferred(self):
+        html = GOOD.replace("</head>", BEACON.replace("<script defer ", "<script ") + "</head>")
+        self.assertTrue(any("defer" in p for p in problems_for(html)))
+
+    def test_beacon_needs_a_site_token(self):
+        html = GOOD.replace("</head>", BEACON.replace("0123456789abcdef0123456789abcdef", "TOKEN") + "</head>")
+        self.assertTrue(any("token" in p for p in problems_for(html)))
+
+    def test_other_third_party_scripts_are_still_rejected(self):
+        html = GOOD.replace("</head>", '<script defer src="https://www.googletagmanager.com/gtag/js"></script></head>')
+        self.assertTrue(any("script not allowed" in p for p in problems_for(html)))
+
+
 class CheckSite(unittest.TestCase):
     def test_check_site_requires_cname_sitemap_robots(self):
         with tempfile.TemporaryDirectory() as d:

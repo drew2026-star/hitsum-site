@@ -34,6 +34,10 @@ APPROVED_PERCENT_SENTENCES = (
 # First-party scripts allowed on a page (must be deferred). Everything else is static.
 ALLOWED_SCRIPTS = {"/assets/js/motion.js"}
 
+# The one third-party script: Cloudflare Web Analytics (no cookies), deferred,
+# with the site's token. hitsum.app isn't proxied, so it needs the beacon.
+BEACON_SRC = "https://static.cloudflareinsights.com/beacon.min.js"
+
 # The only third-party content allowed: YouTube's privacy-enhanced player,
 # which sets no cookies until a visitor presses play.
 EMBED_ORIGIN = "https://www.youtube-nocookie.com"
@@ -226,7 +230,16 @@ def check_page(page: Page, root: Path) -> list[str]:
         problems.append("/style.css not linked")
     for attrs in page.script_attrs:
         src = attrs["src"]
-        if src not in ALLOWED_SCRIPTS:
+        if src == BEACON_SRC:
+            try:
+                token = json.loads(attrs.get("data-cf-beacon", "")).get("token", "")
+            except ValueError:
+                token = ""
+            if not re.fullmatch(r"[0-9a-f]{32}", token):
+                problems.append("analytics beacon needs the site token in data-cf-beacon")
+            if "defer" not in attrs:
+                problems.append("analytics beacon needs defer")
+        elif src not in ALLOWED_SCRIPTS:
             problems.append(f"script not allowed: {src}")
         elif not (root / src[1:]).is_file():
             problems.append(f"script missing: {src}")

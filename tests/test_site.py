@@ -374,7 +374,9 @@ class Privacy(unittest.TestCase):
     @unittest.skipUnless(SRC_MD.exists(), "golftrace repo not on this machine")
     def test_headings_match_source(self):
         want = [line[3:].strip() for line in SRC_MD.read_text().splitlines() if line.startswith("## ")]
-        self.assertEqual(self.p.h2s, want)
+        html = (ROOT / "privacy/index.html").read_text()
+        policy = html[html.index("<!-- POLICY:BEGIN"):html.index("<!-- POLICY:END -->")]
+        self.assertEqual(parse_page(policy).h2s, want)
 
     def test_effective_date(self):
         self.assertIn("October 27, 2026", self.p.text)
@@ -395,6 +397,15 @@ class Privacy(unittest.TestCase):
             want = plain(line)
             if want:
                 self.assertIn(want, text)
+
+    def test_website_analytics_note_survives_regeneration(self):
+        # The policy covers the app; the site's own analytics note sits after the generated part.
+        html = (ROOT / "privacy/index.html").read_text()
+        after = html[html.index("<!-- POLICY:END -->"):]
+        note = parse_page(after)
+        self.assertIn("about-this-website", note.ids)
+        self.assertIn("Cloudflare Web Analytics", note.text)
+        self.assertIn("doesn't use cookies", note.text)
 
     def test_page_is_generated_between_markers(self):
         html = (ROOT / "privacy/index.html").read_text()
