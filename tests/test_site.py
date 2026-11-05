@@ -133,6 +133,13 @@ class SiteFiles(unittest.TestCase):
         # Chromium pane (scrollY stayed 0); instant jumps always land.
         self.assertNotIn("scroll-behavior: smooth", (ROOT / "style.css").read_text())
 
+    def test_no_release_date_promised(self):
+        # Apple's release timing isn't ours to promise: the buttons say "Coming soon".
+        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+            text = page(rel).text
+            self.assertIn("Coming soon to the App Store", text, rel)
+            self.assertNotRegex(text, r"\bNov(ember)?\.? ?\d", rel)
+
     def test_every_page_has_an_install_cta(self):
         # Spec §7: each page carries the CTA block, so visitors landing anywhere can install.
         for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
@@ -193,7 +200,7 @@ class Home(unittest.TestCase):
 
     def test_two_cta_regions_with_prelaunch_text(self):
         self.assertEqual((self.p.cta_begin, self.p.cta_end), (2, 2))
-        self.assertEqual(self.p.text.count("Coming to the App Store · Nov 7"), 2)
+        self.assertEqual(self.p.text.count("Coming soon to the App Store"), 2)
 
     def test_sections_present(self):
         self.assertLessEqual({"features", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)

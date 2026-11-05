@@ -75,7 +75,7 @@ The sections, in order:
 1. **Hero**
    - H1: "Your iPhone is the launch monitor."
    - Subhead: "Ball speed, carry and a traced flight from every swing. Nothing to buy, pair or charge."
-   - **CTA block** (see §7): before release, a pill reading "Coming to the App Store · Nov 7"; after release, Apple's official "Download on the App Store" badge.
+   - **CTA block** (see §7): before release, a pill reading "Coming soon to the App Store" (changed 2026-11-05 from "Coming to the App Store · Nov 7": Apple sets the release date); after release, Apple's official "Download on the App Store" badge.
    - Visual: `design/appstore/upload/iphone/1.png`, shown as-is (it already includes its caption and frame) or cropped to the device area. Pick whichever reads better at phone width during the build.
 2. **Features.** Three blocks, each a screenshot plus a heading and two lines of copy taken from the App Store description:
    - *Launch monitor*: ball speed, launch, carry, total, apex and hang time; results read aloud.
@@ -158,7 +158,7 @@ Each page contains the CTA block in exactly one marked region:
 
 ```html
 <!-- CTA:BEGIN -->
-<span class="cta-pill">Coming to the App Store · Nov 7</span>
+<span class="cta-pill">Coming soon to the App Store</span>
 <!-- CTA:END -->
 ```
 
