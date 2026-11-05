@@ -228,6 +228,11 @@ class Analytics(unittest.TestCase):
     def test_cloudflare_beacon_is_allowed(self):
         self.assertEqual(problems_for(GOOD.replace("</head>", BEACON + "</head>")), [])
 
+    def test_beacon_as_a_module_is_allowed(self):
+        # Cloudflare's own snippet uses type="module", which is deferred by definition.
+        html = GOOD.replace("</head>", BEACON.replace("<script defer ", '<script type="module" ') + "</head>")
+        self.assertEqual(problems_for(html), [])
+
     def test_beacon_must_be_deferred(self):
         html = GOOD.replace("</head>", BEACON.replace("<script defer ", "<script ") + "</head>")
         self.assertTrue(any("defer" in p for p in problems_for(html)))

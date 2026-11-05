@@ -133,6 +133,14 @@ class SiteFiles(unittest.TestCase):
         # Chromium pane (scrollY stayed 0); instant jumps always land.
         self.assertNotIn("scroll-behavior: smooth", (ROOT / "style.css").read_text())
 
+    def test_every_page_has_the_analytics_beacon(self):
+        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+            beacons = [a for a in page(rel).script_attrs
+                       if a["src"] == "https://static.cloudflareinsights.com/beacon.min.js"]
+            self.assertEqual(len(beacons), 1, rel)
+            self.assertEqual(json.loads(beacons[0]["data-cf-beacon"]),
+                             {"token": "250723533f0d4c768547b3042f52fd99"}, rel)
+
     def test_no_release_date_promised(self):
         # Apple's release timing isn't ours to promise: the buttons say "Coming soon".
         for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:

@@ -237,7 +237,7 @@ def check_page(page: Page, root: Path) -> list[str]:
                 token = ""
             if not re.fullmatch(r"[0-9a-f]{32}", token):
                 problems.append("analytics beacon needs the site token in data-cf-beacon")
-            if "defer" not in attrs:
+            if "defer" not in attrs and attrs.get("type") != "module":  # modules are always deferred
                 problems.append("analytics beacon needs defer")
         elif src not in ALLOWED_SCRIPTS:
             problems.append(f"script not allowed: {src}")

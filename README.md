@@ -42,8 +42,11 @@ python3 tools/sitecheck.py
 alt/size attributes, internal links and anchors, and the copy rules: no percentages (except the
 app's exact "off by 13%" distance sentence, listed in `APPROVED_PERCENT_SENTENCES`),
 no comparisons with other launch monitors, no prices, no "side-on", and no Android claims.
-The site makes no third-party requests. If an iframe is ever added it must use YouTube's
-privacy-enhanced player (`youtube-nocookie.com`), carry a `title` and load lazily.
+The only third-party request is Cloudflare Web Analytics (`static.cloudflareinsights.com`,
+no cookies), on every page with the site's token; the checker rejects any other outside script.
+If an iframe is ever added it must use YouTube's privacy-enhanced player (`youtube-nocookie.com`),
+carry a `title` and load lazily. Reports from `localhost` are refused by Cloudflare, so local
+testing doesn't count as visits.
 
 ## Images
 
