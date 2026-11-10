@@ -95,11 +95,12 @@ class SiteFiles(unittest.TestCase):
     def test_posters_are_light(self):
         # Posters can't be lazy-loaded: every one downloads with the hero screenshot.
         # Four full-size posters (190 KB) pushed Home's mobile LCP from 2.2 s to 2.6 s.
+        # Play Course's poster (10 KB) made it five and raised the budget to 105 KB.
         posters = sorted((ROOT / "assets/video").glob("*.webp"))
-        self.assertEqual(len(posters), 4)
+        self.assertEqual(len(posters), 5)
         for f in posters:
             self.assertEqual(Image.open(f).width, 480, f.name)
-        self.assertLess(sum(f.stat().st_size for f in posters), 100_000)
+        self.assertLess(sum(f.stat().st_size for f in posters), 105_000)
 
     def test_kit_photo_outputs_have_no_metadata(self):
         for f in ["kit-480.webp", "kit-960.webp", "kit-960.jpg"]:
@@ -211,7 +212,7 @@ class Home(unittest.TestCase):
         self.assertEqual(self.p.text.count("Coming soon to the App Store"), 2)
 
     def test_sections_present(self):
-        self.assertLessEqual({"features", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)
+        self.assertLessEqual({"features", "play-course", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)
 
     def test_faq_items(self):
         self.assertEqual(self.p.details_count, 7)
@@ -247,7 +248,7 @@ class Home(unittest.TestCase):
     def test_setup_video_section_comes_right_after_the_hero(self):
         html = (ROOT / "index.html").read_text()
         order = re.findall(r'<section[^>]*\bid="([^"]+)"', html)
-        self.assertEqual(order, ["setup-steps", "features", "honest", "free-premium", "faq"])
+        self.assertEqual(order, ["setup-steps", "features", "play-course", "honest", "free-premium", "faq"])
         self.assertLess(html.index('class="wrap hero"'), html.index('id="setup-steps"'))
 
     def test_trace_clip_in_features(self):
