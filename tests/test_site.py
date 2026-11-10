@@ -248,7 +248,7 @@ class Home(unittest.TestCase):
     def test_setup_video_section_comes_right_after_the_hero(self):
         html = (ROOT / "index.html").read_text()
         order = re.findall(r'<section[^>]*\bid="([^"]+)"', html)
-        self.assertEqual(order, ["setup-steps", "features", "play-course", "honest", "free-premium", "faq"])
+        self.assertEqual(order, ["setup-steps", "play-course", "features", "honest", "free-premium", "faq"])
         self.assertLess(html.index('class="wrap hero"'), html.index('id="setup-steps"'))
 
     def test_trace_clip_in_features(self):
