@@ -17,6 +17,7 @@ ORIGIN = "https://hitsum.app"
 PAGES: dict[str, str | None] = {
     "index.html": f"{ORIGIN}/",
     "setup/index.html": f"{ORIGIN}/setup/",
+    "indoor/index.html": f"{ORIGIN}/indoor/",
     "support/index.html": f"{ORIGIN}/support/",
     "privacy/index.html": f"{ORIGIN}/privacy/",
     "404.html": None,

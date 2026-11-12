@@ -135,7 +135,7 @@ class SiteFiles(unittest.TestCase):
         self.assertNotIn("scroll-behavior: smooth", (ROOT / "style.css").read_text())
 
     def test_every_page_has_the_analytics_beacon(self):
-        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+        for rel in ["index.html", "setup/index.html", "indoor/index.html", "support/index.html", "privacy/index.html", "404.html"]:
             beacons = [a for a in page(rel).script_attrs
                        if a["src"] == "https://static.cloudflareinsights.com/beacon.min.js"]
             self.assertEqual(len(beacons), 1, rel)
@@ -144,14 +144,14 @@ class SiteFiles(unittest.TestCase):
 
     def test_no_release_date_promised(self):
         # Apple's release timing isn't ours to promise: the buttons say "Coming soon".
-        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+        for rel in ["index.html", "setup/index.html", "indoor/index.html", "support/index.html", "privacy/index.html", "404.html"]:
             text = page(rel).text
             self.assertIn("Coming soon to the App Store", text, rel)
             self.assertNotRegex(text, r"\bNov(ember)?\.? ?\d", rel)
 
     def test_every_page_has_an_install_cta(self):
         # Spec §7: each page carries the CTA block, so visitors landing anywhere can install.
-        for rel in ["index.html", "setup/index.html", "support/index.html", "privacy/index.html", "404.html"]:
+        for rel in ["index.html", "setup/index.html", "indoor/index.html", "support/index.html", "privacy/index.html", "404.html"]:
             self.assertGreaterEqual(page(rel).cta_begin, 1, rel)
 
     def test_cta_pill_wraps_on_narrow_screens(self):

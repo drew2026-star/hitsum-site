@@ -14,11 +14,12 @@ them still for visitors who prefer reduced motion, and runs the setup clip's "So
 |---|---|
 | `/` | `index.html` |
 | `/setup/` | `setup/index.html` |
+| `/indoor/` | `indoor/index.html` |
 | `/support/` | `support/index.html` |
 | `/privacy/` | `privacy/index.html` |
 | (not found) | `404.html` |
 
-Every page repeats the same header and footer block. Change one, change all five.
+Every page repeats the same header and footer block. Change one, change all six.
 
 ## Preview
 
