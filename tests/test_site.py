@@ -142,12 +142,12 @@ class SiteFiles(unittest.TestCase):
             self.assertEqual(json.loads(beacons[0]["data-cf-beacon"]),
                              {"token": "250723533f0d4c768547b3042f52fd99"}, rel)
 
-    def test_no_release_date_promised(self):
-        # Apple's release timing isn't ours to promise: the buttons say "Coming soon".
+    def test_every_page_links_the_app_store(self):
+        # Released 2026-11: every install button is Apple's badge linking the listing.
         for rel in ["index.html", "setup/index.html", "indoor/index.html", "support/index.html", "privacy/index.html", "404.html"]:
-            text = page(rel).text
-            self.assertIn("Coming soon to the App Store", text, rel)
-            self.assertNotRegex(text, r"\bNov(ember)?\.? ?\d", rel)
+            p = page(rel)
+            self.assertIn("https://apps.apple.com/app/id6813047446", p.links, rel)
+            self.assertNotIn("Coming soon to the App Store", p.text, rel)
 
     def test_every_page_has_an_install_cta(self):
         # Spec §7: each page carries the CTA block, so visitors landing anywhere can install.
@@ -207,9 +207,10 @@ class Home(unittest.TestCase):
         self.assertEqual(self.p.h1s, ["Your iPhone is the launch monitor."])
         self.assertIn("Nothing to buy, pair or charge.", self.p.text)
 
-    def test_two_cta_regions_with_prelaunch_text(self):
+    def test_two_cta_regions_with_app_store_link(self):
         self.assertEqual((self.p.cta_begin, self.p.cta_end), (2, 2))
-        self.assertEqual(self.p.text.count("Coming soon to the App Store"), 2)
+        self.assertIn("https://apps.apple.com/app/id6813047446", self.p.links)
+        self.assertNotIn("Coming soon to the App Store", self.p.text)
 
     def test_sections_present(self):
         self.assertLessEqual({"features", "play-course", "honest", "setup-steps", "free-premium", "faq"}, self.p.ids)
@@ -388,7 +389,7 @@ class Privacy(unittest.TestCase):
         self.assertEqual(parse_page(policy).h2s, want)
 
     def test_effective_date(self):
-        self.assertIn("October 27, 2026", self.p.text)
+        self.assertIn("November 16, 2026", self.p.text)
 
     @unittest.skipUnless(SRC_MD.exists(), "golftrace repo not on this machine")
     def test_every_line_of_the_policy_is_on_the_page(self):
