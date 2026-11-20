@@ -201,9 +201,12 @@ def main() -> None:
     svg = svg.replace(' xmlns:c2pa="http://c2pa.org/manifest"', "")
     (OUT / "wordmark.svg").write_text(svg)
 
-    icon = Image.open(SRC / "icons/AppIcon-comet-1024.png").convert("RGB")
+    # The app's own icon, as it ships: the site's icon follows the app's.
+    icon = Image.open(GOLFTRACE / "ios/GolfTraceApp/GolfTraceApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png").convert("RGB")
     icon.resize((180, 180), Image.LANCZOS).save(OUT / "icon-180.png", optimize=True)
     icon.resize((32, 32), Image.LANCZOS).save(OUT / "favicon-32.png", optimize=True)
+    # Search engines ask for a multiple of 48 px.
+    icon.resize((96, 96), Image.LANCZOS).save(OUT / "favicon-96.png", optimize=True)
 
     header = Image.open(SRC / "appstore/upload/header-16x9.png").convert("RGB")
     cover(header, (1200, 630)).save(OUT / "og.png", optimize=True)
